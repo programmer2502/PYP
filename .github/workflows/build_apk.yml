@@ -28,11 +28,25 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Generate Canonical Android Scaffolding
+        run: |
+          echo "Generating official Android platform scaffolding from Flutter..."
+          rm -rf android
+          flutter create --platforms=android --org=com.pyp.lensmatch temp_platform
+          cp -r temp_platform/android ./android
+          rm -rf temp_platform
+          
+          # Enable MultiDex and MinSdk 21
+          if [ -f "android/app/build.gradle" ]; then
+            sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
+            sed -i 's/minSdk = .*/minSdk = 21/g' android/app/build.gradle
+          fi
+
       - name: Install Flutter Dependencies
         run: flutter pub get
 
       - name: Build Android Release APK
-        run: flutter build apk --release --verbose
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
