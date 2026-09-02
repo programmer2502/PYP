@@ -28,23 +28,6 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Generate Android Platform Files
-        run: |
-          if [ ! -d "android" ]; then
-            echo "Generating Android scaffolding..."
-            flutter create . --platforms=android --org=com.pyp.lensmatch
-          fi
-
-      - name: Configure Android Permissions & MinSdk
-        run: |
-          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
-            sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n    <uses-permission android:name="android.permission.CAMERA"/>' android/app/src/main/AndroidManifest.xml
-          fi
-          if [ -f "android/app/build.gradle" ]; then
-            sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
-            sed -i 's/minSdk = .*/minSdk = 21/g' android/app/build.gradle
-          fi
-
       - name: Install Flutter Dependencies
         run: flutter pub get
 
