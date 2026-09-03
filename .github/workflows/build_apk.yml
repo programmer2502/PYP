@@ -36,10 +36,12 @@ jobs:
           cp -r temp_platform/android ./android
           rm -rf temp_platform
           
-          # Enable MultiDex and MinSdk 21
+          # Enable MultiDex, MinSdk 21 and Core Library Desugaring
           if [ -f "android/app/build.gradle" ]; then
             sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
             sed -i 's/minSdk = .*/minSdk = 21/g' android/app/build.gradle
+            sed -i 's/compileOptions {/compileOptions {\n        coreLibraryDesugaringEnabled true/g' android/app/build.gradle
+            sed -i 's/dependencies {/dependencies {\n    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4"/g' android/app/build.gradle
           fi
 
       - name: Install Flutter Dependencies
