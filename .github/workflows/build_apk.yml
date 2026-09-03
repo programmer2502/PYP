@@ -30,18 +30,23 @@ jobs:
 
       - name: Generate Canonical Android Scaffolding
         run: |
-          echo "Generating official Android platform scaffolding from Flutter..."
+          echo "Generating official Android platform scaffolding..."
           rm -rf android
           flutter create --platforms=android --org=com.pyp.lensmatch temp_platform
           cp -r temp_platform/android ./android
           rm -rf temp_platform
           
-          # Enable MultiDex, MinSdk 21 and Core Library Desugaring
+          # Configure minSdk 21 and core library desugaring for notification/datetime plugins
           if [ -f "android/app/build.gradle" ]; then
             sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
             sed -i 's/minSdk = .*/minSdk = 21/g' android/app/build.gradle
             sed -i 's/compileOptions {/compileOptions {\n        coreLibraryDesugaringEnabled true/g' android/app/build.gradle
-            sed -i 's/dependencies {/dependencies {\n    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4"/g' android/app/build.gradle
+            
+            # Append required desugaring dependency
+            echo "" >> android/app/build.gradle
+            echo "dependencies {" >> android/app/build.gradle
+            echo "    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'" >> android/app/build.gradle
+            echo "}" >> android/app/build.gradle
           fi
 
       - name: Install Flutter Dependencies
