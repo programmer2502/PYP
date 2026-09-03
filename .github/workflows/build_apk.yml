@@ -36,13 +36,11 @@ jobs:
           cp -r temp_platform/android ./android
           rm -rf temp_platform
           
-          # Configure minSdk 21 and core library desugaring for notification/datetime plugins
+          # Configure minSdk 21 and core library desugaring
           if [ -f "android/app/build.gradle" ]; then
             sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
             sed -i 's/minSdk = .*/minSdk = 21/g' android/app/build.gradle
             sed -i 's/compileOptions {/compileOptions {\n        coreLibraryDesugaringEnabled true/g' android/app/build.gradle
-            
-            # Append required desugaring dependency
             echo "" >> android/app/build.gradle
             echo "dependencies {" >> android/app/build.gradle
             echo "    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'" >> android/app/build.gradle
@@ -53,11 +51,24 @@ jobs:
         run: flutter pub get
 
       - name: Build Android Release APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: |
+          set +e
+          flutter build apk --release --no-tree-shake-icons --verbose > build_log.txt 2>&1
+          EXIT_CODE=$?
+          echo "=== BUILD LOG TAIL ==="
+          tail -n 150 build_log.txt
+          exit $EXIT_CODE
+
+      - name: Upload Build Log on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-build-failure-log
+          path: build_log.txt
 
       - name: Upload Release APK Artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: PYP-PickYourPhotographer-Release-APK
           path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
