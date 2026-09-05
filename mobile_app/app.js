@@ -333,3 +333,134 @@ function applyFilters() {
   closeFilterModal();
   renderCreators(creators);
 }
+
+// -------------------------------------------------------------
+// REAL-TIME CHAT SYSTEM
+// -------------------------------------------------------------
+const chatsList = [
+  {
+    id: 'chat_arjun',
+    creatorId: 'photo_arjun_mehta',
+    name: 'Arjun Mehta',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80',
+    lastMessage: 'I uploaded the moodboard for our sunset shoot! 🌅',
+    time: '2m ago',
+    unread: 1,
+    messages: [
+      { sender: 'creator', text: 'Hi! Looking forward to our shoot this Saturday in Bandra.', time: '10:30 AM' },
+      { sender: 'user', text: 'Hi Arjun! Can we do golden hour portraits near the bandstand?', time: '10:32 AM' },
+      { sender: 'creator', text: 'Absolutely! I uploaded the moodboard for our sunset shoot! 🌅', time: '10:35 AM' }
+    ]
+  },
+  {
+    id: 'chat_priya',
+    creatorId: 'photo_priya_sharma',
+    name: 'Priya Sharma',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&q=80',
+    lastMessage: 'Looking forward to the royal pre-wedding session!',
+    time: '1h ago',
+    unread: 0,
+    messages: [
+      { sender: 'creator', text: 'Hello! I checked the dates and Juhu beach location is perfect.', time: '09:15 AM' },
+      { sender: 'user', text: 'Great! See you on Saturday.', time: '09:20 AM' }
+    ]
+  },
+  {
+    id: 'chat_kabir',
+    creatorId: 'photo_kabir_sen',
+    name: 'Kabir Sen',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80',
+    lastMessage: 'Drone clearance is confirmed for the shoot location 🚁',
+    time: 'Yesterday',
+    unread: 0,
+    messages: [
+      { sender: 'creator', text: 'Drone clearance is confirmed for the shoot location 🚁', time: 'Yesterday' }
+    ]
+  }
+];
+
+let activeChat = chatsList[0];
+
+function renderChatsList() {
+  const container = document.getElementById('chats-list-container');
+  if (!container) return;
+
+  container.innerHTML = chatsList.map(chat => `
+    <div onclick="openChatRoom('${chat.id}')" style="background: #FFF; border-radius: 16px; border: 1px solid var(--border); padding: 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; box-shadow: var(--shadow-sm);">
+      <div style="position: relative;">
+        <img src="${chat.avatar}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+        <div style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: var(--primary); border: 2px solid #FFF; border-radius: 50%;"></div>
+      </div>
+      <div style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-family: 'Outfit'; font-weight: 700; font-size: 15px;">${chat.name}</span>
+          <span style="font-size: 11px; color: var(--text-muted);">${chat.time}</span>
+        </div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 3px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;">${chat.lastMessage}</span>
+          ${chat.unread > 0 ? `<span style="background: var(--primary); color: #FFF; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">${chat.unread}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openChatRoom(chatId) {
+  activeChat = chatsList.find(c => c.id === chatId) || chatsList[0];
+  activeChat.unread = 0;
+
+  document.getElementById('chat-room-avatar').src = activeChat.avatar;
+  document.getElementById('chat-room-name').innerText = activeChat.name;
+
+  renderMessages();
+  goToScreen('screen-chat-room');
+}
+
+function renderMessages() {
+  const container = document.getElementById('chat-messages-container');
+  if (!container) return;
+
+  container.innerHTML = activeChat.messages.map(m => {
+    const isMe = m.sender === 'user';
+    return `
+      <div style="display: flex; justify-content: ${isMe ? 'flex-end' : 'flex-start'};">
+        <div style="max-width: 75%; background: ${isMe ? 'var(--primary)' : '#FFF'}; color: ${isMe ? '#FFF' : 'var(--text-main)'}; border: ${isMe ? 'none' : '1px solid var(--border)'}; border-radius: ${isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px'}; padding: 12px 14px; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 13px; line-height: 1.4;">${m.text}</div>
+          <div style="font-size: 10px; color: ${isMe ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)'}; text-align: right; margin-top: 4px;">${m.time}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  activeChat.messages.push({
+    sender: 'user',
+    text: text,
+    time: 'Just now'
+  });
+  input.value = '';
+  renderMessages();
+
+  // Simulated Creator Instant Reply
+  setTimeout(() => {
+    activeChat.messages.push({
+      sender: 'creator',
+      text: 'Got it! Looking forward to creating great shots together! 📸',
+      time: 'Just now'
+    });
+    renderMessages();
+  }, 1200);
+}
+
+// Update DOM loaded listener to render chats
+window.addEventListener('DOMContentLoaded', () => {
+  renderChatsList();
+});
+

@@ -432,6 +432,45 @@
       </div>
     </div>
 
+    <!-- 9. CHATS INBOX SCREEN -->
+    <div id="screen-chats" class="screen">
+      <div class="app-header">
+        <span style="font-family: 'Outfit'; font-weight: 700; font-size: 18px;">Messages & Direct Chat</span>
+        <button class="icon-btn" onclick="alert('Search messages')"><i class="fa-solid fa-magnifying-glass"></i></button>
+      </div>
+
+      <div style="padding: 14px 18px; display: flex; flex-direction: column; gap: 10px;" id="chats-list-container">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- 10. CHAT ROOM SCREEN -->
+    <div id="screen-chat-room" class="screen" style="padding-bottom: 74px; background: #F8FAFC;">
+      <div class="app-header">
+        <button onclick="goToScreen('screen-chats')" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></button>
+        <div style="display: flex; align-items: center; gap: 10px; margin-right: auto; margin-left: 10px;">
+          <img id="chat-room-avatar" src="" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+          <div>
+            <div id="chat-room-name" style="font-weight: 700; font-size: 15px; font-family: 'Outfit';">Arjun Mehta</div>
+            <div style="font-size: 11px; color: var(--primary); font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Online</div>
+          </div>
+        </div>
+        <button class="icon-btn" onclick="alert('Calling creator...')"><i class="fa-solid fa-phone"></i></button>
+      </div>
+
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1;" id="chat-messages-container">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Chat Input Box -->
+      <div style="position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; background: #FFF; padding: 10px 16px var(--safe-bottom); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; z-index: 50;">
+        <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; padding: 10px 14px; border-radius: 100px; border: 1.5px solid var(--border); outline: none; font-size: 14px;">
+        <button onclick="sendMessage()" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #FFF; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <i class="fa-solid fa-paper-plane" style="font-size: 14px;"></i>
+        </button>
+      </div>
+    </div>
+
     <!-- BOTTOM NAVIGATION -->
     <div class="bottom-nav" id="main-bottom-nav">
       <div class="nav-item active" onclick="goToScreen('screen-home'); setActiveNav(this)">
@@ -442,9 +481,9 @@
         <i class="fa-solid fa-calendar-check"></i>
         <span>Bookings</span>
       </div>
-      <div class="nav-item" onclick="goToScreen('screen-deliverables'); setActiveNav(this)">
-        <i class="fa-solid fa-box-archive"></i>
-        <span>Deliverables</span>
+      <div class="nav-item" onclick="goToScreen('screen-chats'); setActiveNav(this)">
+        <i class="fa-solid fa-comment-dots"></i>
+        <span>Chat</span>
       </div>
       <div class="nav-item" onclick="goToScreen('screen-creator-dashboard'); setActiveNav(this)">
         <i class="fa-solid fa-sliders"></i>
