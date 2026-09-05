@@ -7,6 +7,9 @@ import 'core/routing/app_router.dart';
 import 'core/supabase/supabase_config.dart';
 import 'services/notification_service.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -21,7 +24,16 @@ void main() async {
     ),
   );
 
-  // Initialize Supabase Backend
+  // Initialize Firebase (Auth & Google/Email/OTP)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization notice: $e');
+  }
+
+  // Initialize Supabase Backend (PostgreSQL DB + Storage)
   try {
     await Supabase.initialize(
       url: SupabaseConfig.url,

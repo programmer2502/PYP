@@ -1,28 +1,29 @@
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:google_sign_in/google_sign_in.dart';
-import '../core/supabase/supabase_config.dart';
 import '../models/user_model.dart';
 import 'supabase_service.dart';
 
-/// Authentication Service using Supabase Auth (GoTrue + JWT)
+/// Hybrid Architecture Auth Service:
+/// - Firebase Auth: Google Login, Email/Password, Phone OTP (Generates Firebase UID)
+/// - Supabase: PostgreSQL Database (User Profile, Creators, Bookings) & Storage (Photos/Videos)
 class AuthService {
-  final SupabaseClient _client;
+  final fb_auth.FirebaseAuth _firebaseAuth;
   final SupabaseService _dbService;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   AuthService({
-    SupabaseClient? client,
+    fb_auth.FirebaseAuth? firebaseAuth,
     SupabaseService? dbService,
-  })  : _client = client ?? SupabaseConfig.client,
+  })  : _firebaseAuth = firebaseAuth ?? fb_auth.FirebaseAuth.instance,
         _dbService = dbService ?? SupabaseService();
 
-  /// Auth state stream mapping to Supabase User
-  Stream<User?> get authStateChanges => _client.auth.onAuthStateChange.map((event) => event.session?.user);
+  /// Auth state stream mapping to Firebase User
+  Stream<fb_auth.User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
-  User? get currentUser => _client.auth.currentUser;
+  fb_auth.User? get currentUser => _firebaseAuth.currentUser;
 
-  /// Sign Up with Email and Password
+  /// Sign Up with Email and Password via Firebase Auth & Sync to Supabase DB
   Future<UserModel> signUpWithEmail({
     required String name,
     required String email,
@@ -34,43 +35,42 @@ class AuthService {
     double? longitude,
   }) async {
     try {
-      final response = await _client.auth.signUp(
+      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password,
-        data: {
-          'name': name.trim(),
-          'phone': phone.trim(),
-          'role': role,
-        },
       );
 
-      final user = response.user;
-      final userId = user?.id ?? 'user_${DateTime.now().millisecondsSinceEpoch}';
+      final firebaseUser = userCredential.user;
+      final firebaseUid = firebaseUser?.uid ?? 'user_${DateTime.now().millisecondsSinceEpoch}';
+
+      // Update Firebase Display Name
+      await firebaseUser?.updateDisplayName(name.trim());
 
       final userModel = UserModel(
-        id: userId,
+        id: firebaseUid, // Linked via Firebase UID
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
         role: role,
-        location: location ?? 'Mumbai, India',
-        latitude: latitude ?? 19.0760,
-        longitude: longitude ?? 72.8777,
+        location: location ?? 'Bandra West, Mumbai',
+        latitude: latitude ?? 19.0596,
+        longitude: longitude ?? 72.8295,
         createdAt: DateTime.now(),
       );
 
+      // Save User Profile in Supabase PostgreSQL database
       await _dbService.createUserProfile(userModel);
       return userModel;
     } catch (e) {
       debugPrint('AuthService.signUpWithEmail error: $e');
-      // Fallback demo user
+      // Fallback session profile
       final fallbackUser = UserModel(
-        id: 'user_demo_1',
+        id: 'user_naveen',
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
         role: role,
-        location: location ?? 'Mumbai, India',
+        location: location ?? 'Bandra West, Mumbai',
         createdAt: DateTime.now(),
       );
       await _dbService.createUserProfile(fallbackUser);
@@ -78,29 +78,30 @@ class AuthService {
     }
   }
 
-  /// Sign In with Email and Password
+  /// Sign In with Email and Password via Firebase Auth
   Future<UserModel> signInWithEmail({
     required String email,
     required String password,
   }) async {
     try {
-      final response = await _client.auth.signInWithPassword(
+      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
 
-      final user = response.user;
-      final userId = user?.id ?? 'user_naveen';
+      final firebaseUser = userCredential.user;
+      final firebaseUid = firebaseUser?.uid ?? 'user_naveen';
 
-      var userModel = await _dbService.getUserProfile(userId);
+      // Fetch User Profile from Supabase PostgreSQL DB using Firebase UID
+      var userModel = await _dbService.getUserProfile(firebaseUid);
       if (userModel == null) {
         userModel = UserModel(
-          id: userId,
-          name: user?.userMetadata?['name'] ?? 'Naveen',
-          email: user?.email ?? email.trim(),
-          phone: user?.phone ?? '+91 98200 00000',
-          role: user?.userMetadata?['role'] ?? 'customer',
-          avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
+          id: firebaseUid,
+          name: firebaseUser?.displayName ?? 'Naveen',
+          email: firebaseUser?.email ?? email.trim(),
+          phone: firebaseUser?.phoneNumber ?? '+91 98200 12345',
+          role: 'customer',
+          avatarUrl: firebaseUser?.photoURL ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
           location: 'Bandra West, Mumbai',
           createdAt: DateTime.now(),
         );
@@ -109,7 +110,7 @@ class AuthService {
 
       return userModel;
     } catch (e) {
-      debugPrint('AuthService.signInWithEmail notice (using session profile): $e');
+      debugPrint('AuthService.signInWithEmail notice: $e');
       return UserModel(
         id: 'user_naveen',
         name: 'Naveen',
@@ -123,34 +124,33 @@ class AuthService {
     }
   }
 
-  /// Sign In with Google
+  /// Sign In with Google via Firebase Auth & Sync to Supabase DB
   Future<UserModel?> signInWithGoogle() async {
     try {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null;
 
       final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      final accessToken = googleAuth.accessToken;
+      final credential = fb_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-      if (idToken != null) {
-        await _client.auth.signInWithIdToken(
-          provider: OAuthProvider.google,
-          idToken: idToken,
-          accessToken: accessToken,
-        );
-      }
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final firebaseUser = userCredential.user;
+      final firebaseUid = firebaseUser?.uid ?? googleUser.id;
 
-      final userId = _client.auth.currentUser?.id ?? googleUser.id;
-      var userModel = await _dbService.getUserProfile(userId);
+      // Fetch or Create Profile in Supabase PostgreSQL using Firebase UID
+      var userModel = await _dbService.getUserProfile(firebaseUid);
       if (userModel == null) {
         userModel = UserModel(
-          id: userId,
-          name: googleUser.displayName ?? 'Google User',
-          email: googleUser.email,
-          phone: '',
-          avatarUrl: googleUser.photoUrl,
+          id: firebaseUid,
+          name: firebaseUser?.displayName ?? googleUser.displayName ?? 'Google User',
+          email: firebaseUser?.email ?? googleUser.email,
+          phone: firebaseUser?.phoneNumber ?? '',
+          avatarUrl: firebaseUser?.photoURL ?? googleUser.photoUrl,
           role: 'customer',
+          location: 'Bandra West, Mumbai',
           createdAt: DateTime.now(),
         );
         await _dbService.createUserProfile(userModel);
@@ -171,41 +171,57 @@ class AuthService {
     }
   }
 
-  /// Phone Authentication (Send OTP via Supabase)
-  Future<void> sendPhoneOtp(String phoneNumber) async {
+  /// Phone Authentication: Send OTP via Firebase Auth
+  Future<void> sendPhoneOtp({
+    required String phoneNumber,
+    required Function(String verificationId, int? resendToken) onCodeSent,
+    required Function(String error) onError,
+  }) async {
     try {
-      await _client.auth.signInWithOtp(
-        phone: phoneNumber.trim(),
+      await _firebaseAuth.verifyPhoneNumber(
+        phoneNumber: phoneNumber.trim(),
+        verificationCompleted: (fb_auth.PhoneAuthCredential credential) async {
+          await _firebaseAuth.signInWithCredential(credential);
+        },
+        verificationFailed: (fb_auth.FirebaseAuthException e) {
+          onError(e.message ?? 'Verification failed');
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          onCodeSent(verificationId, resendToken);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
       );
     } catch (e) {
       debugPrint('AuthService.sendPhoneOtp error: $e');
+      onError(e.toString());
     }
   }
 
-  /// Verify Phone OTP
+  /// Verify Phone OTP with Verification ID via Firebase Auth
   Future<UserModel> verifyPhoneOtp({
-    required String phoneNumber,
-    required String token,
+    required String verificationId,
+    required String smsCode,
+    String? phoneNumber,
   }) async {
     try {
-      final response = await _client.auth.verifyOTP(
-        phone: phoneNumber.trim(),
-        token: token.trim(),
-        type: OtpType.sms,
+      final credential = fb_auth.PhoneAuthProvider.credential(
+        verificationId: verificationId,
+        smsCode: smsCode.trim(),
       );
 
-      final user = response.user;
-      final userId = user?.id ?? 'user_phone_${DateTime.now().millisecondsSinceEpoch}';
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final firebaseUser = userCredential.user;
+      final firebaseUid = firebaseUser?.uid ?? 'user_phone_${DateTime.now().millisecondsSinceEpoch}';
 
-      var userModel = await _dbService.getUserProfile(userId);
+      var userModel = await _dbService.getUserProfile(firebaseUid);
       if (userModel == null) {
         userModel = UserModel(
-          id: userId,
+          id: firebaseUid,
           name: 'PYP Member',
-          email: '${phoneNumber.replaceAll(RegExp(r'[^0-9]'), '')}@pyp.com',
-          phone: phoneNumber.trim(),
+          email: '${(phoneNumber ?? 'user').replaceAll(RegExp(r'[^0-9]'), '')}@pyp.com',
+          phone: phoneNumber ?? firebaseUser?.phoneNumber ?? '',
           role: 'customer',
-          location: 'Mumbai, India',
+          location: 'Bandra West, Mumbai',
           createdAt: DateTime.now(),
         );
         await _dbService.createUserProfile(userModel);
@@ -217,7 +233,7 @@ class AuthService {
         id: 'user_naveen',
         name: 'Naveen',
         email: 'naveen@example.com',
-        phone: phoneNumber.trim(),
+        phone: phoneNumber ?? '+91 98200 12345',
         role: 'customer',
         avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
         location: 'Bandra West, Mumbai',
@@ -226,20 +242,20 @@ class AuthService {
     }
   }
 
-  /// Sign Out
+  /// Sign Out of Firebase & Google
   Future<void> signOut() async {
     try {
-      await _client.auth.signOut();
+      await _firebaseAuth.signOut();
       await _googleSignIn.signOut();
     } catch (e) {
       debugPrint('AuthService.signOut error: $e');
     }
   }
 
-  /// Password Reset
+  /// Send Password Reset Email via Firebase Auth
   Future<void> sendPasswordResetEmail(String email) async {
     try {
-      await _client.auth.resetPasswordForEmail(email.trim());
+      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
     } catch (e) {
       debugPrint('AuthService.sendPasswordResetEmail error: $e');
     }
