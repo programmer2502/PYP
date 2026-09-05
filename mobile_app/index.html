@@ -153,50 +153,44 @@
     <div id="screen-home" class="screen">
       <!-- Header -->
       <div class="app-header">
-        <div class="location-pill" onclick="alert('Location Picker: Bandra West, Juhu, Andheri, Colaba')">
+        <div class="location-pill" onclick="openLocationModal()">
           <i class="fa-solid fa-location-dot"></i>
-          <span>Bandra West, Mumbai</span>
-          <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: #94A3B8;"></i>
+          <span id="header-location-text">Bengaluru</span>
+          <i class="fa-solid fa-chevron-down" style="font-size: 11px; color: #64748B; margin-left: 2px;"></i>
         </div>
-        <div class="header-actions">
-          <button onclick="goToScreen('screen-creator-dashboard')" class="icon-btn" title="Creator Studio"><i class="fa-solid fa-camera"></i></button>
-          <button onclick="alert('No new notifications.')" class="icon-btn" title="Notifications"><i class="fa-solid fa-bell"></i></button>
+        <div class="user-avatar-btn" onclick="goToScreen('screen-user-profile'); setActiveNavIndex(3);" title="Account Profile">
+          U
         </div>
       </div>
 
       <!-- Search Bar -->
       <div class="search-container">
         <div class="search-box">
-          <i class="fa-solid fa-magnifying-glass" style="color: #94A3B8;"></i>
-          <input type="text" id="search-input" placeholder="Search creators, weddings, reels..." oninput="filterCreators(this.value)">
+          <i class="fa-solid fa-magnifying-glass" style="color: #94A3B8; font-size: 15px;"></i>
+          <input type="text" id="search-input" placeholder="Search by creator, style, or city..." oninput="filterCreators(this.value)">
         </div>
         <button class="filter-btn" onclick="openFilterModal()"><i class="fa-solid fa-sliders"></i></button>
       </div>
 
-      <!-- Category Filter Chips -->
-      <div class="categories-slider">
-        <div class="category-chip active" onclick="setCategory('All', this)">All</div>
-        <div class="category-chip" onclick="setCategory('Wedding', this)">💍 Wedding</div>
-        <div class="category-chip" onclick="setCategory('Portrait', this)">📸 Portrait</div>
-        <div class="category-chip" onclick="setCategory('Reels', this)">🎬 Reels</div>
-        <div class="category-chip" onclick="setCategory('Fashion', this)">👗 Fashion</div>
-        <div class="category-chip" onclick="setCategory('Drone', this)">🚁 Drone</div>
-        <div class="category-chip" onclick="setCategory('Pre-Wedding', this)">👶 Pre-Wedding</div>
+      <!-- Category Slider with Rounded Square Thumbnails -->
+      <div class="categories-slider" id="categories-container">
+        <!-- Injected via JS -->
       </div>
 
-      <!-- Featured Strip -->
+      <!-- Featured Spotlight Section -->
       <div class="section-header">
-        <div class="section-title">Top Rated Creators</div>
-        <span style="font-size: 12px; font-weight: 700; color: var(--primary); cursor: pointer;" onclick="setCategory('All', document.querySelector('.category-chip'))">See All</span>
+        <div class="section-title">
+          <span style="color: #F59E0B;">✨</span> Featured Spotlight
+        </div>
       </div>
       <div class="featured-scroll" id="featured-scroll-container">
         <!-- Injected via JS -->
       </div>
 
-      <!-- Main Creators List -->
-      <div class="section-header" style="padding-top: 4px;">
-        <div class="section-title">Explore Creators</div>
-        <span id="results-count" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">6 Available</span>
+      <!-- Available Photographers List -->
+      <div class="section-header" style="padding-top: 6px;">
+        <div class="section-title">Available Photographers</div>
+        <span id="results-count" style="font-size: 11.5px; color: var(--primary-dark); font-weight: 700; background: var(--primary-light); padding: 3px 8px; border-radius: 100px;">3 verified</span>
       </div>
       <div class="creators-list" id="creators-container">
         <!-- Injected via JavaScript -->
@@ -432,61 +426,312 @@
       </div>
     </div>
 
-    <!-- 9. CHATS INBOX SCREEN -->
-    <div id="screen-chats" class="screen">
+    <!-- 11. USER PROFILE SCREEN -->
+    <div id="screen-user-profile" class="screen">
       <div class="app-header">
-        <span style="font-family: 'Outfit'; font-weight: 700; font-size: 18px;">Messages & Direct Chat</span>
-        <button class="icon-btn" onclick="alert('Search messages')"><i class="fa-solid fa-magnifying-glass"></i></button>
+        <span style="font-family: 'Outfit'; font-weight: 700; font-size: 18px;">Account & Profile</span>
+        <button class="icon-btn" onclick="showToast('Profile editing enabled')"><i class="fa-solid fa-pen-to-square"></i></button>
       </div>
 
-      <div style="padding: 14px 18px; display: flex; flex-direction: column; gap: 10px;" id="chats-list-container">
+      <div style="padding: 16px 18px;">
+        <!-- VIP Hero Card -->
+        <div class="profile-hero-card">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="position: relative;">
+              <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #10B981); display: flex; align-items: center; justify-content: center; font-family: 'Outfit'; font-size: 24px; font-weight: 800; color: #FFF; box-shadow: 0 4px 14px rgba(0,168,107,0.4); border: 2.5px solid rgba(255,255,255,0.2);">
+                N
+              </div>
+              <div style="position: absolute; bottom: 0; right: 0; width: 18px; height: 18px; border-radius: 50%; background: var(--primary); border: 2px solid #0B132B; display: flex; align-items: center; justify-content: center; color: #FFF; font-size: 9px;">
+                <i class="fa-solid fa-check"></i>
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-family: 'Outfit'; font-size: 19px; font-weight: 800; color: #FFF;">Naveen Raj</span>
+                <i class="fa-solid fa-circle-check" style="color: var(--primary); font-size: 15px;"></i>
+              </div>
+              <div style="font-size: 12px; color: #94A3B8; margin-top: 2px;">r.r.naveenraj25@gmail.com</div>
+              <div class="vip-badge">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> PYP Elite VIP Member
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-box" onclick="goToScreen('screen-bookings'); setActiveNavIndex(1);">
+            <div class="stat-num" id="stat-shoots-count">3</div>
+            <div class="stat-label">Shoots Booked</div>
+          </div>
+          <div class="stat-box" onclick="goToScreen('screen-saved-photographers');">
+            <div class="stat-num" id="stat-favorites-count">4</div>
+            <div class="stat-label">Saved Creators</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">2</div>
+            <div class="stat-label">Reviews Left</div>
+          </div>
+        </div>
+
+        <!-- User Account Menu List -->
+        <div class="menu-card">
+          <div class="menu-item-row" onclick="goToScreen('screen-saved-photographers')">
+            <div class="menu-icon-wrap" style="background: #FCE7F3; color: #DB2777;">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+            <div class="menu-text-wrap">
+              <div class="menu-title">Saved Photographers</div>
+              <div class="menu-subtitle">Your favorited creator shortlist</div>
+            </div>
+            <span id="badge-fav-count" style="background: #FCE7F3; color: #DB2777; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 100px;">4</span>
+            <i class="fa-solid fa-chevron-right" style="color: #CBD5E1; font-size: 12px; margin-left: 8px;"></i>
+          </div>
+
+          <div class="menu-item-row" onclick="goToScreen('screen-bookings'); setActiveNavIndex(1);">
+            <div class="menu-icon-wrap" style="background: #E0F2FE; color: #0284C7;">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div class="menu-text-wrap">
+              <div class="menu-title">My Bookings & Invoices</div>
+              <div class="menu-subtitle">Active sessions, dates & escrow status</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: #CBD5E1; font-size: 12px;"></i>
+          </div>
+
+          <div class="menu-item-row" onclick="goToScreen('screen-deliverables')">
+            <div class="menu-icon-wrap" style="background: #E8F8F2; color: var(--primary);">
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+            </div>
+            <div class="menu-text-wrap">
+              <div class="menu-title">Cloud Deliverables Gallery</div>
+              <div class="menu-subtitle">Download high-res photos & 4K ZIP</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: #CBD5E1; font-size: 12px;"></i>
+          </div>
+
+          <div class="menu-item-row" onclick="openEscrowModal()">
+            <div class="menu-icon-wrap" style="background: #FEF3C7; color: #D97706;">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="menu-text-wrap">
+              <div class="menu-title">Escrow Protection & Payments</div>
+              <div class="menu-subtitle">100% money-back security info</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: #CBD5E1; font-size: 12px;"></i>
+          </div>
+
+          <div class="menu-item-row" onclick="goToScreen('screen-help-support')">
+            <div class="menu-icon-wrap" style="background: #F3E8FF; color: #9333EA;">
+              <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <div class="menu-text-wrap">
+              <div class="menu-title">Help & Support</div>
+              <div class="menu-subtitle">FAQs, cancellation policy & 24/7 help</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: #CBD5E1; font-size: 12px;"></i>
+          </div>
+        </div>
+
+        <!-- Role Switch & Logout -->
+        <div class="menu-card">
+          <div class="menu-item-row" onclick="goToScreen('screen-creator-dashboard')">
+            <div class="menu-icon-wrap" style="background: #E8F8F2; color: var(--primary);">
+              <i class="fa-solid fa-camera-rotate"></i>
+            </div>
+            <div class="menu-text-wrap">
+              <div class="menu-title">Switch to Creator Studio</div>
+              <div class="menu-subtitle">Manage bookings & upload deliverables</div>
+            </div>
+            <i class="fa-solid fa-arrow-right-arrow-left" style="color: var(--primary); font-size: 13px;"></i>
+          </div>
+
+          <div class="menu-item-row" onclick="handleSignOut()">
+            <div class="menu-icon-wrap" style="background: #FEE2E2; color: #EF4444;">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
+            <div class="menu-text-wrap">
+              <div class="menu-title" style="color: #EF4444;">Sign Out</div>
+              <div class="menu-subtitle">Log out of your PYP account</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: #CBD5E1; font-size: 12px;"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 12. SAVED PHOTOGRAPHERS SCREEN -->
+    <div id="screen-saved-photographers" class="screen">
+      <div class="app-header">
+        <button onclick="goToScreen('screen-user-profile')" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></button>
+        <span style="font-family: 'Outfit'; font-weight: 700; font-size: 18px;">Saved Creators</span>
+        <div style="width: 38px;"></div>
+      </div>
+
+      <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 14px;" id="saved-creators-container">
         <!-- Injected via JS -->
       </div>
     </div>
 
-    <!-- 10. CHAT ROOM SCREEN -->
-    <div id="screen-chat-room" class="screen" style="padding-bottom: 74px; background: #F8FAFC;">
+    <!-- 13. HELP & SUPPORT SCREEN -->
+    <div id="screen-help-support" class="screen">
       <div class="app-header">
-        <button onclick="goToScreen('screen-chats')" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></button>
-        <div style="display: flex; align-items: center; gap: 10px; margin-right: auto; margin-left: 10px;">
-          <img id="chat-room-avatar" src="" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
-          <div>
-            <div id="chat-room-name" style="font-weight: 700; font-size: 15px; font-family: 'Outfit';">Arjun Mehta</div>
-            <div style="font-size: 11px; color: var(--primary); font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Online</div>
+        <button onclick="goToScreen('screen-user-profile')" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></button>
+        <span style="font-family: 'Outfit'; font-weight: 700; font-size: 18px;">Help & Support</span>
+        <div style="width: 38px;"></div>
+      </div>
+
+      <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: linear-gradient(135deg, #00A86B, #059669); border-radius: 18px; padding: 18px; color: #FFF; box-shadow: 0 8px 20px rgba(0,168,107,0.3);">
+          <div style="font-family: 'Outfit'; font-size: 18px; font-weight: 800;">24/7 Client Assistance</div>
+          <p style="font-size: 12px; margin-top: 4px; opacity: 0.9;">Have questions about your booking, escrow release, or photographers? Our concierge team is available 24/7.</p>
+          <button onclick="showToast('Connecting to PYP Concierge...')" style="margin-top: 14px; background: #FFF; color: var(--primary); font-weight: 700; font-size: 13px; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-brands fa-whatsapp" style="font-size: 16px;"></i> Chat on WhatsApp
+          </button>
+        </div>
+
+        <h3 style="font-family: 'Outfit'; font-size: 16px; font-weight: 700; margin-top: 10px;">Frequently Asked Questions</h3>
+        
+        <div style="background: #FFF; border-radius: 14px; border: 1px solid var(--border); padding: 14px;">
+          <div style="font-weight: 700; font-size: 14px; color: var(--text-main);">🛡️ How does Escrow Protection work?</div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">When you book a photographer, your payment is held in a secure escrow vault. The funds are only transferred to the creator once you review and approve the final deliverables.</p>
+        </div>
+
+        <div style="background: #FFF; border-radius: 14px; border: 1px solid var(--border); padding: 14px;">
+          <div style="font-weight: 700; font-size: 14px; color: var(--text-main);">📅 What is the cancellation policy?</div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">Full refund if cancelled up to 48 hours prior to the scheduled shoot date. Rescheduling is 100% free with creator mutual consent.</p>
+        </div>
+
+        <div style="background: #FFF; border-radius: 14px; border: 1px solid var(--border); padding: 14px;">
+          <div style="font-weight: 700; font-size: 14px; color: var(--text-main);">☁️ How do I receive my photos?</div>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">Photographers upload high-resolution color-graded files directly to your cloud gallery, available in single-tap high-res view and full master ZIP download.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCATION PICKER MODAL -->
+    <div id="modal-location" class="modal-overlay">
+      <div class="modal-sheet">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-family: 'Outfit'; font-size: 20px; font-weight: 800;">Choose Location</h3>
+          <i class="fa-solid fa-xmark" style="font-size: 20px; color: var(--text-muted); cursor: pointer;" onclick="closeLocationModal()"></i>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Find top verified creators in your city.</p>
+
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <div onclick="selectLocation('Bandra West, Mumbai')" style="padding: 14px; border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: #F8FAFC;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-location-dot" style="color: var(--primary);"></i>
+              <span style="font-weight: 700; font-size: 14px;">Bandra West, Mumbai</span>
+            </div>
+            <i class="fa-solid fa-check" style="color: var(--primary);"></i>
+          </div>
+          <div onclick="selectLocation('Juhu, Mumbai')" style="padding: 14px; border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-location-dot" style="color: var(--text-muted);"></i>
+              <span style="font-weight: 600; font-size: 14px;">Juhu, Mumbai</span>
+            </div>
+          </div>
+          <div onclick="selectLocation('Indiranagar, Bengaluru')" style="padding: 14px; border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-location-dot" style="color: var(--text-muted);"></i>
+              <span style="font-weight: 600; font-size: 14px;">Indiranagar, Bengaluru</span>
+            </div>
+          </div>
+          <div onclick="selectLocation('Connaught Place, New Delhi')" style="padding: 14px; border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-location-dot" style="color: var(--text-muted);"></i>
+              <span style="font-weight: 600; font-size: 14px;">Connaught Place, New Delhi</span>
+            </div>
+          </div>
+          <div onclick="selectLocation('North Goa Beach, Goa')" style="padding: 14px; border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-location-dot" style="color: var(--text-muted);"></i>
+              <span style="font-weight: 600; font-size: 14px;">North Goa Beach, Goa</span>
+            </div>
           </div>
         </div>
-        <button class="icon-btn" onclick="alert('Calling creator...')"><i class="fa-solid fa-phone"></i></button>
       </div>
+    </div>
 
-      <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1;" id="chat-messages-container">
-        <!-- Injected via JS -->
+    <!-- ESCROW INFO MODAL -->
+    <div id="modal-escrow-info" class="modal-overlay">
+      <div class="modal-sheet">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-family: 'Outfit'; font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> PYP Escrow Vault
+          </h3>
+          <i class="fa-solid fa-xmark" style="font-size: 20px; color: var(--text-muted); cursor: pointer;" onclick="closeEscrowModal()"></i>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 6px;">Zero financial risk for clients. Guaranteed payment for verified creators.</p>
+
+        <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; gap: 12px; background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+            <div style="font-weight: 800; color: var(--primary); font-size: 16px;">1</div>
+            <div style="font-size: 12px; color: var(--text-main); line-height: 1.4;"><strong>Booking deposit held in Escrow:</strong> You pay upon booking, but funds remain safeguarded in the PYP bank escrow vault.</div>
+          </div>
+          <div style="display: flex; gap: 12px; background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+            <div style="font-weight: 800; color: var(--primary); font-size: 16px;">2</div>
+            <div style="font-size: 12px; color: var(--text-main); line-height: 1.4;"><strong>Photos delivered for inspection:</strong> The creator shoots and uploads watermarked / high-res deliverables to your cloud gallery.</div>
+          </div>
+          <div style="display: flex; gap: 12px; background: #F8FAFC; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+            <div style="font-weight: 800; color: var(--primary); font-size: 16px;">3</div>
+            <div style="font-size: 12px; color: var(--text-main); line-height: 1.4;"><strong>You approve & release:</strong> Once you are 100% satisfied, you tap "Approve & Release Escrow" to transfer payment.</div>
+          </div>
+        </div>
+
+        <button onclick="closeEscrowModal()" class="btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;">Got it, thanks!</button>
       </div>
+    </div>
 
-      <!-- Chat Input Box -->
-      <div style="position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; background: #FFF; padding: 10px 16px var(--safe-bottom); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; z-index: 50;">
-        <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; padding: 10px 14px; border-radius: 100px; border: 1.5px solid var(--border); outline: none; font-size: 14px;">
-        <button onclick="sendMessage()" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #FFF; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-          <i class="fa-solid fa-paper-plane" style="font-size: 14px;"></i>
+    <!-- FULL SCREEN LIGHTBOX MODAL WITH EXIF -->
+    <div id="modal-lightbox" class="lightbox-modal">
+      <div style="display: flex; justify-content: space-between; align-items: center; color: #FFF;">
+        <span id="lightbox-title" style="font-family: 'Outfit'; font-weight: 700; font-size: 15px;">Editorial Light Showcase</span>
+        <button onclick="closeLightbox()" style="background: rgba(255,255,255,0.2); border: none; color: #FFF; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+          <i class="fa-solid fa-xmark" style="font-size: 18px;"></i>
         </button>
       </div>
+
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 10px 0;">
+        <img id="lightbox-img" src="" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+      </div>
+
+      <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 12px 16px; color: #FFF;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 11px; color: #94A3B8; font-weight: 600;">EXIF CAMERA METADATA</div>
+            <div id="lightbox-exif" style="font-size: 12px; font-weight: 700; margin-top: 2px;">Sony A7 IV • 85mm f/1.4 GM • 1/250s • ISO 100</div>
+          </div>
+          <button onclick="showToast('Downloading high-res RAW/JPEG...')" style="background: var(--primary); color: #FFF; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-download"></i> Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-notice" class="toast-notice">
+      <i class="fa-solid fa-circle-check" style="color: var(--primary);"></i>
+      <span id="toast-text">Notification message</span>
     </div>
 
     <!-- BOTTOM NAVIGATION -->
     <div class="bottom-nav" id="main-bottom-nav">
       <div class="nav-item active" onclick="goToScreen('screen-home'); setActiveNav(this)">
-        <i class="fa-solid fa-compass"></i>
+        <div class="nav-icon-wrap"><i class="fa-solid fa-compass"></i></div>
         <span>Explore</span>
       </div>
       <div class="nav-item" onclick="goToScreen('screen-bookings'); setActiveNav(this)">
-        <i class="fa-solid fa-calendar-check"></i>
+        <div class="nav-icon-wrap"><i class="fa-regular fa-calendar-check"></i></div>
         <span>Bookings</span>
       </div>
       <div class="nav-item" onclick="goToScreen('screen-chats'); setActiveNav(this)">
-        <i class="fa-solid fa-comment-dots"></i>
-        <span>Chat</span>
+        <div class="nav-icon-wrap"><i class="fa-regular fa-comment-dots"></i></div>
+        <span>Messages</span>
       </div>
-      <div class="nav-item" onclick="goToScreen('screen-creator-dashboard'); setActiveNav(this)">
-        <i class="fa-solid fa-user"></i>
+      <div class="nav-item" onclick="goToScreen('screen-user-profile'); setActiveNav(this)">
+        <div class="nav-icon-wrap"><i class="fa-regular fa-user"></i></div>
         <span>Profile</span>
       </div>
     </div>
