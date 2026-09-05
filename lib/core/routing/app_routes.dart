@@ -1,12 +1,15 @@
 class AppRoutes {
   AppRoutes._();
 
-  static const String splash = '/';
+  static const String splash = '/splash';
+  static const String roleSelection = '/role-selection';
   static const String login = '/login';
   static const String signup = '/signup';
   static const String phoneAuth = '/phone-auth';
   static const String otpVerify = '/otp-verify';
   static const String forgotPassword = '/forgot-password';
+  static const String creatorOnboarding = '/creator-onboarding';
+  static const String creatorDashboard = '/creator-dashboard';
 
   // Shell Tabs
   static const String home = '/home';

@@ -122,6 +122,14 @@ class SupabaseService {
     }
   }
 
+  Future<void> createPhotographerProfile(PhotographerModel photographer) async {
+    try {
+      await _client.from('photographers').upsert(photographer.toMap());
+    } catch (e) {
+      debugPrint('SupabaseService.createPhotographerProfile error: $e');
+    }
+  }
+
   // --------------------------------------------------------------------------
   // PACKAGES
   // --------------------------------------------------------------------------

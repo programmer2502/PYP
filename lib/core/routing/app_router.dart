@@ -33,6 +33,11 @@ import '../../screens/profile/saved_photographers_screen.dart';
 import '../../screens/review/write_review_screen.dart';
 import 'app_routes.dart';
 
+import '../../screens/splash_screen.dart';
+import '../../screens/auth/role_selection_screen.dart';
+import '../../screens/photographer/creator_onboarding_screen.dart';
+import '../../screens/photographer/creator_dashboard_screen.dart';
+
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHome = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
 final _shellNavigatorBookings = GlobalKey<NavigatorState>(debugLabel: 'shellBookings');
@@ -40,43 +45,29 @@ final _shellNavigatorChats = GlobalKey<NavigatorState>(debugLabel: 'shellChats')
 final _shellNavigatorProfile = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateStreamProvider);
-
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: AppRoutes.home,
-    redirect: (context, state) {
-      final isLoading = authState.isLoading;
-      final hasUser = authState.value != null;
-      final isAuthRoute = state.matchedLocation == AppRoutes.login ||
-          state.matchedLocation == AppRoutes.signup ||
-          state.matchedLocation == AppRoutes.phoneAuth ||
-          state.matchedLocation == AppRoutes.otpVerify ||
-          state.matchedLocation == AppRoutes.forgotPassword;
-
-      if (isLoading) return null;
-
-      // If user is not logged in and not on an auth route, let them explore or redirect when necessary
-      if (!hasUser && !isAuthRoute) {
-        // Allow home browsing, but guard bookings, chat, and profile
-        if (state.matchedLocation.startsWith('/my-bookings') ||
-            state.matchedLocation.startsWith('/chat') ||
-            state.matchedLocation.startsWith('/book') ||
-            state.matchedLocation.startsWith('/edit-profile')) {
-          return AppRoutes.login;
-        }
-      }
-
-      if (hasUser && isAuthRoute) {
-        return AppRoutes.home;
-      }
-
-      return null;
-    },
+    initialLocation: AppRoutes.splash,
     routes: [
       // -------------------------------------------------------------
-      // AUTH ROUTES
+      // ONBOARDING & AUTH FLOW
       // -------------------------------------------------------------
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.roleSelection,
+        builder: (context, state) => const RoleSelectionScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creatorOnboarding,
+        builder: (context, state) => const CreatorOnboardingScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creatorDashboard,
+        builder: (context, state) => const CreatorDashboardScreen(),
+      ),
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
