@@ -4,7 +4,7 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Default [FirebaseOptions] for use with your Firebase apps.
+/// Default [FirebaseOptions] configured with live Firebase Project 'pyp-app-fc631'.
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -21,25 +21,28 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA_sampleApiKeyWeb1234567890abcdef',
-    appId: '1:100000000000:web:abcdef1234567890abcdef',
-    messagingSenderId: '100000000000',
-    projectId: 'pyp-pickyourphotographer',
-    authDomain: 'pyp-pickyourphotographer.firebaseapp.com',
+    apiKey: 'AIzaSyCq_UibliO1Q_5Bp9vFzxZqcAv2bAJ-kro',
+    appId: '1:951546987988:web:ce4ecf9d98eb5bb01f8241',
+    messagingSenderId: '951546987988',
+    projectId: 'pyp-app-fc631',
+    authDomain: 'pyp-app-fc631.firebaseapp.com',
+    storageBucket: 'pyp-app-fc631.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA_sampleApiKeyAndroid1234567890abc',
-    appId: '1:100000000000:android:abcdef1234567890abcdef',
-    messagingSenderId: '100000000000',
-    projectId: 'pyp-pickyourphotographer',
+    apiKey: 'AIzaSyCq_UibliO1Q_5Bp9vFzxZqcAv2bAJ-kro',
+    appId: '1:951546987988:android:ce4ecf9d98eb5bb01f8241',
+    messagingSenderId: '951546987988',
+    projectId: 'pyp-app-fc631',
+    storageBucket: 'pyp-app-fc631.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA_sampleApiKeyIos1234567890abcdefg',
-    appId: '1:100000000000:ios:abcdef1234567890abcdef',
-    messagingSenderId: '100000000000',
-    projectId: 'pyp-pickyourphotographer',
+    apiKey: 'AIzaSyCq_UibliO1Q_5Bp9vFzxZqcAv2bAJ-kro',
+    appId: '1:951546987988:ios:ce4ecf9d98eb5bb01f8241',
+    messagingSenderId: '951546987988',
+    projectId: 'pyp-app-fc631',
+    storageBucket: 'pyp-app-fc631.firebasestorage.app',
     iosBundleId: 'com.pyp.lensmatch',
   );
 }

@@ -28,7 +28,7 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Generate Canonical Android Scaffolding
+      - name: Generate Canonical Android Scaffolding & Firebase Setup
         run: |
           echo "Generating official Android platform scaffolding..."
           rm -rf android
@@ -36,7 +36,10 @@ jobs:
           cp -r temp_platform/android ./android
           rm -rf temp_platform
           
-          # Configure minSdk 21 and core library desugaring
+          # Copy live google-services.json into android/app
+          cp google-services.json android/app/google-services.json
+          
+          # Configure minSdk 21, Google Services and core library desugaring
           if [ -f "android/app/build.gradle" ]; then
             sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
             sed -i 's/minSdk = .*/minSdk = 21/g' android/app/build.gradle
