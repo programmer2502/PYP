@@ -199,7 +199,7 @@ CREATE POLICY "Public insert deliverables" ON public.deliverables FOR INSERT WIT
 INSERT INTO public.users (id, name, email, phone, avatar_url, role, location)
 VALUES
 (
-    'u1111111-1111-1111-1111-111111111111',
+    'e1111111-1111-1111-1111-111111111111',
     'Natasha Verma',
     'natasha.verma@example.com',
     '+91 98765 43210',
@@ -208,7 +208,7 @@ VALUES
     'Indiranagar, Bengaluru'
 ),
 (
-    'u2222222-2222-2222-2222-222222222222',
+    'e2222222-2222-2222-2222-222222222222',
     'Rishi Kapoor',
     'rishi.kapoor@example.com',
     '+91 98123 45678',
@@ -217,7 +217,7 @@ VALUES
     'Bandra West, Mumbai'
 ),
 (
-    'u3333333-3333-3333-3333-333333333333',
+    'e3333333-3333-3333-3333-333333333333',
     'Sunil Hegde',
     'sunil.hegde@example.com',
     '+91 99887 76655',
@@ -226,7 +226,7 @@ VALUES
     'Whitefield, Bengaluru'
 ),
 (
-    'u4444444-4444-4444-4444-444444444444',
+    'e4444444-4444-4444-4444-444444444444',
     'Naveen Raj',
     'r.r.naveenraj25@gmail.com',
     '+91 91234 56789',
@@ -420,7 +420,7 @@ INSERT INTO public.reviews (id, customer_id, photographer_id, rating, comment, c
 VALUES
 (
     'c1111111-1111-1111-1111-111111111111',
-    'u1111111-1111-1111-1111-111111111111',
+    'e1111111-1111-1111-1111-111111111111',
     'a1111111-1111-1111-1111-111111111111',
     5.0,
     'Arjun Mehta is a true master of lighting! The magazine-style portraits exceeded all expectations.',
@@ -429,7 +429,7 @@ VALUES
 ),
 (
     'c2222222-2222-2222-2222-222222222222',
-    'u2222222-2222-2222-2222-222222222222',
+    'e2222222-2222-2222-2222-222222222222',
     'a1111111-1111-1111-1111-111111111111',
     4.9,
     'Super fast 48h turnaround on the cloud gallery. The tones and depth of the photos are breathtaking. 10/10 recommend!',
@@ -438,7 +438,7 @@ VALUES
 ),
 (
     'c3333333-3333-3333-3333-333333333333',
-    'u3333333-3333-3333-3333-333333333333',
+    'e3333333-3333-3333-3333-333333333333',
     'a3333333-3333-3333-3333-333333333333',
     5.0,
     'Kabir did an unbelievable drone shoot for our Bengaluru estate. The 4K footage was silky smooth.',
