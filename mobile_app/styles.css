@@ -194,6 +194,34 @@ body {
   background: #F1F5F9;
 }
 
+/* Header & Action Icon Buttons */
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #F8FAFC;
+  color: #334155;
+  border: 1.5px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.icon-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+  background: #E2E8F0;
+}
+
 /* Category Slider with Rounded Square Thumbnails */
 /* Filter System & Chips */
 .filter-section-title {
