@@ -224,6 +224,12 @@
         <div class="section-title">Available Photographers</div>
         <span id="results-count" style="font-size: 11.5px; color: var(--primary-dark); font-weight: 700; background: var(--primary-light); padding: 3px 8px; border-radius: 100px;">3 verified</span>
       </div>
+
+      <!-- Active Filters Tag Bar -->
+      <div id="active-filters-bar" style="display: none; padding: 0 18px 10px; gap: 6px; flex-wrap: wrap; align-items: center;">
+        <!-- Injected via JS -->
+      </div>
+
       <div class="creators-list" id="creators-container">
         <!-- Injected via JavaScript -->
       </div>
@@ -426,35 +432,168 @@
       </div>
     </div>
 
-    <!-- FILTER MODAL SHEET -->
+    <!-- ADVANCED FILTER MODAL SYSTEM (FULL ARCHITECTURE) -->
     <div id="modal-filter" class="modal-overlay">
-      <div class="modal-sheet">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="font-family: 'Outfit'; font-size: 20px; font-weight: 800;">Filter Creators</h3>
-          <i class="fa-solid fa-xmark" style="font-size: 20px; color: var(--text-muted); cursor: pointer;" onclick="closeFilterModal()"></i>
-        </div>
-        
-        <div style="margin-top: 18px;">
-          <label style="font-size: 13px; font-weight: 700;">Max Budget (₹)</label>
-          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-            <span style="font-weight: 700; color: var(--primary);">₹ 2,000</span>
-            <span id="price-val" style="font-weight: 800; color: var(--primary);">₹ 10,000</span>
+      <div class="modal-sheet" style="max-height: 90vh; padding: 20px 20px calc(var(--safe-bottom) + 20px);">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+          <div>
+            <h3 style="font-family: 'Outfit'; font-size: 20px; font-weight: 800;">Filter System</h3>
+            <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Search by service, location, gear & style</p>
           </div>
-          <input type="range" min="2000" max="25000" step="500" value="10000" style="width: 100%; accent-color: var(--primary); margin-top: 6px;" oninput="document.getElementById('price-val').innerText = '₹ ' + parseInt(this.value).toLocaleString()">
-        </div>
-
-        <div style="margin-top: 18px;">
-          <label style="font-size: 13px; font-weight: 700;">Minimum Rating</label>
-          <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <div class="category-chip active" style="font-size: 12px; padding: 6px 12px;">★ Any</div>
-            <div class="category-chip" style="font-size: 12px; padding: 6px 12px;">★ 4.5+</div>
-            <div class="category-chip" style="font-size: 12px; padding: 6px 12px;">★ 4.8+</div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button onclick="resetAllFilters()" style="background: none; border: none; font-size: 13px; font-weight: 700; color: #EF4444; cursor: pointer;">Reset All</button>
+            <i class="fa-solid fa-xmark" style="font-size: 20px; color: var(--text-muted); cursor: pointer;" onclick="closeFilterModal()"></i>
           </div>
         </div>
 
-        <button onclick="applyFilters()" class="btn-primary" style="width: 100%; margin-top: 24px; padding: 12px;">
-          Apply Filters
-        </button>
+        <div style="padding: 14px 0; display: flex; flex-direction: column; gap: 18px;">
+          
+          <!-- 1. SORT / RANK BY -->
+          <div>
+            <label class="filter-section-title">SORT & RANK BY</label>
+            <div class="filter-chip-group" style="margin-top: 8px;">
+              <div class="category-chip active" id="f-sort-recommended" onclick="setFilterSort('recommended', this)">✨ Recommended</div>
+              <div class="category-chip" id="f-sort-distance" onclick="setFilterSort('distance', this)">📍 Nearest (Radar)</div>
+              <div class="category-chip" id="f-sort-rating" onclick="setFilterSort('rating', this)">⭐ Top Rated</div>
+              <div class="category-chip" id="f-sort-price-asc" onclick="setFilterSort('price_asc', this)">₹ Price: Low to High</div>
+              <div class="category-chip" id="f-sort-price-desc" onclick="setFilterSort('price_desc', this)">₹ Price: High to Low</div>
+            </div>
+          </div>
+
+          <!-- 2. SERVICE TYPE (PHOTOGRAPHY / VIDEOGRAPHY / BOTH) -->
+          <div>
+            <label class="filter-section-title">SERVICE TYPE</label>
+            <div class="filter-chip-group" style="margin-top: 8px;">
+              <div class="category-chip active" id="f-service-all" onclick="setFilterService('all', this)">All Services</div>
+              <div class="category-chip" id="f-service-photo" onclick="setFilterService('Photographer', this)">📸 Photography</div>
+              <div class="category-chip" id="f-service-video" onclick="setFilterService('Videographer', this)">🎬 Videography</div>
+              <div class="category-chip" id="f-service-both" onclick="setFilterService('Both', this)">✨ Photo + Video Combo</div>
+            </div>
+          </div>
+
+          <!-- 3. LOCATION & RADIUS -->
+          <div>
+            <label class="filter-section-title">LOCATION & SEARCH RADIUS</label>
+            <div style="margin-top: 8px; display: flex; gap: 10px;">
+              <div style="flex: 1.2;">
+                <select id="filter-city-select" onchange="updateFilterQueryCount()" style="width: 100%; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 13px; font-weight: 600; background: #F8FAFC; outline: none;">
+                  <option value="all">📍 All Cities</option>
+                  <option value="Bengaluru" selected>📍 Bengaluru</option>
+                  <option value="Mumbai">📍 Mumbai</option>
+                  <option value="Delhi">📍 New Delhi</option>
+                  <option value="Goa">📍 Goa</option>
+                </select>
+              </div>
+              <div style="flex: 1;">
+                <select id="filter-radius-select" onchange="updateFilterQueryCount()" style="width: 100%; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 13px; font-weight: 600; background: #F8FAFC; outline: none;">
+                  <option value="10">Radius: 10 km</option>
+                  <option value="5">Radius: 5 km</option>
+                  <option value="25">Radius: 25 km</option>
+                  <option value="50" selected>Radius: 50+ km</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. DATE, TIME & DURATION -->
+          <div>
+            <label class="filter-section-title">DATE & SHOOT TIMING</label>
+            <div style="margin-top: 8px; display: flex; gap: 10px;">
+              <div style="flex: 1;">
+                <input type="date" id="filter-date-input" value="2026-09-12" onchange="updateFilterQueryCount()" style="width: 100%; padding: 9px 12px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 12.5px; background: #F8FAFC; outline: none;">
+              </div>
+              <div style="flex: 1;">
+                <select id="filter-duration-select" onchange="updateFilterQueryCount()" style="width: 100%; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--border); font-size: 12.5px; font-weight: 600; background: #F8FAFC; outline: none;">
+                  <option value="2">⏱️ 2 Hours Shoot</option>
+                  <option value="1">⏱️ 1 Hour Shoot</option>
+                  <option value="4">⏱️ 4 Hours Half-Day</option>
+                  <option value="8">⏱️ 8 Hours Full-Day</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-chip-group" style="margin-top: 8px;">
+              <div class="category-chip active" id="f-time-any" onclick="setFilterTime('any', this)">Any Time</div>
+              <div class="category-chip" id="f-time-golden" onclick="setFilterTime('golden', this)">🌅 Golden Hour (4-6 PM)</div>
+              <div class="category-chip" id="f-time-morning" onclick="setFilterTime('morning', this)">☀️ Morning (10 AM-12 PM)</div>
+              <div class="category-chip" id="f-time-night" onclick="setFilterTime('night', this)">🌙 Night / Event</div>
+            </div>
+          </div>
+
+          <!-- 5. PRICE RANGE (₹) -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="filter-section-title">MAX PRICE BUDGET (₹)</label>
+              <span id="filter-price-badge" style="font-family: 'Outfit'; font-size: 15px; font-weight: 800; color: var(--primary);">₹ 15,000</span>
+            </div>
+            <input type="range" id="filter-price-slider" min="2000" max="25000" step="500" value="15000" style="width: 100%; accent-color: var(--primary); margin-top: 10px;" oninput="onFilterPriceChange(this.value)">
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--text-muted); font-weight: 600;">
+              <span>₹ 2,000 (Budget)</span>
+              <span>₹ 15,000 (Standard)</span>
+              <span>₹ 25,000 (Luxury)</span>
+            </div>
+          </div>
+
+          <!-- 6. RATING & REVIEWS -->
+          <div>
+            <label class="filter-section-title">CREATOR RATING</label>
+            <div class="filter-chip-group" style="margin-top: 8px;">
+              <div class="category-chip active" id="f-rating-any" onclick="setFilterRating(0, this)">★ Any Rating</div>
+              <div class="category-chip" id="f-rating-45" onclick="setFilterRating(4.5, this)">★ 4.5+</div>
+              <div class="category-chip" id="f-rating-48" onclick="setFilterRating(4.8, this)">★ 4.8+</div>
+              <div class="category-chip" id="f-rating-50" onclick="setFilterRating(5.0, this)">⭐ 5.0 Star Only</div>
+            </div>
+          </div>
+
+          <!-- 7. STYLE / TYPE (MULTI-SELECT) -->
+          <div>
+            <label class="filter-section-title">PHOTOGRAPHY / VIDEO STYLES</label>
+            <div class="filter-chip-group" style="margin-top: 8px;">
+              <div class="category-chip" onclick="toggleStyleFilter('Cinematic', this)">Cinematic</div>
+              <div class="category-chip" onclick="toggleStyleFilter('Editorial', this)">Editorial</div>
+              <div class="category-chip" onclick="toggleStyleFilter('Moody & Dark', this)">Moody & Dark</div>
+              <div class="category-chip" onclick="toggleStyleFilter('Vibrant & Warm', this)">Vibrant & Warm</div>
+              <div class="category-chip" onclick="toggleStyleFilter('Candid', this)">Candid</div>
+              <div class="category-chip" onclick="toggleStyleFilter('HDR', this)">HDR / Drone</div>
+              <div class="category-chip" onclick="toggleStyleFilter('Fashion', this)">Fashion</div>
+              <div class="category-chip" onclick="toggleStyleFilter('Commercial', this)">Commercial</div>
+            </div>
+          </div>
+
+          <!-- 8. EXPERIENCE LEVEL -->
+          <div>
+            <label class="filter-section-title">EXPERIENCE LEVEL</label>
+            <div class="filter-chip-group" style="margin-top: 8px;">
+              <div class="category-chip active" id="f-exp-any" onclick="setFilterExp(0, this)">Any Experience</div>
+              <div class="category-chip" id="f-exp-3" onclick="setFilterExp(3, this)">3+ Years</div>
+              <div class="category-chip" id="f-exp-5" onclick="setFilterExp(5, this)">5+ Years Pro</div>
+              <div class="category-chip" id="f-exp-8" onclick="setFilterExp(8, this)">8+ Years Master</div>
+            </div>
+          </div>
+
+          <!-- 9. CAMERA EQUIPMENT & GEAR (MULTI-SELECT) -->
+          <div>
+            <label class="filter-section-title">CAMERA GEAR & EQUIPMENT</label>
+            <div class="filter-chip-group" style="margin-top: 8px;">
+              <div class="category-chip" onclick="toggleGearFilter('Sony', this)">Sony Full-Frame (A7 IV/FX3)</div>
+              <div class="category-chip" onclick="toggleGearFilter('Canon', this)">Canon R-Series (R5)</div>
+              <div class="category-chip" onclick="toggleGearFilter('Drone', this)">DJI 4K Cinema Drone</div>
+              <div class="category-chip" onclick="toggleGearFilter('Profoto', this)">Studio Strobe Lighting</div>
+              <div class="category-chip" onclick="toggleGearFilter('Gimbal', this)">Gimbal Stabilizer</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sticky Bottom Action Bar -->
+        <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; gap: 10px; margin-top: 8px;">
+          <button onclick="resetAllFilters()" style="flex: 1; padding: 13px; border-radius: 12px; border: 1.5px solid var(--border); background: #F8FAFC; font-weight: 700; font-size: 13px; color: var(--text-main); cursor: pointer;">
+            Reset All
+          </button>
+          <button id="btn-apply-filters" onclick="applyAdvancedFilters()" class="btn-primary" style="flex: 2; padding: 13px; font-size: 14px; justify-content: center;">
+            Show Matching Creators →
+          </button>
+        </div>
       </div>
     </div>
 

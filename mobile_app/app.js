@@ -5,15 +5,18 @@ const creators = [
     name: 'Arjun Mehta',
     type: 'Photographer',
     tagline: 'Vogue Featured • Cinematic Light Specialist',
+    experience: 8,
     categories: ['Wedding', 'Portrait', 'Fashion', 'Reels'],
     styles: ['Cinematic', 'Editorial', 'Moody & Dark', 'Vibrant & Warm'],
     rating: 5.0,
     reviews: 128,
     price: 4999,
     hourly: 2499,
-    location: 'Bengaluru',
     city: 'Bengaluru',
+    location: 'Indiranagar, Bengaluru',
+    distanceKm: 1.2,
     distance: '1.2 km',
+    timeSlots: ['morning', 'golden', 'night'],
     cover: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&q=80',
     equipment: ['Sony A7 IV Body', 'FE 85mm f/1.4 GM', 'FE 50mm f/1.2 GM', 'Profoto B10 Plus', 'Godox AD200 Pro'],
     photos: [
@@ -28,15 +31,18 @@ const creators = [
     name: 'Priya Sharma',
     type: 'Photographer',
     tagline: 'Luxury Destination Wedding & Candid Storyteller',
+    experience: 6,
     categories: ['Wedding', 'Event', 'Portrait'],
     styles: ['Candid', 'Vibrant & Warm', 'Cinematic'],
     rating: 4.9,
     reviews: 94,
     price: 7999,
     hourly: 3500,
-    location: 'Bengaluru',
     city: 'Bengaluru',
+    location: 'Koramangala, Bengaluru',
+    distanceKm: 3.8,
     distance: '3.8 km',
+    timeSlots: ['morning', 'golden'],
     cover: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80',
     equipment: ['Canon EOS R5', 'RF 28-70mm f/2 L', 'RF 70-200mm f/2.8 IS', 'Profoto A1X AirTTL'],
     photos: [
@@ -50,17 +56,20 @@ const creators = [
     name: 'Kabir Sen',
     type: 'Videographer',
     tagline: 'Viral Reels & 4K Cinema Drone Specialist',
+    experience: 5,
     categories: ['Drone', 'Reels', 'Event'],
     styles: ['Cinematic', 'Vibrant & Warm', 'Commercial'],
     rating: 4.9,
     reviews: 76,
     price: 3999,
     hourly: 1999,
-    location: 'Bengaluru',
     city: 'Bengaluru',
+    location: 'Whitefield, Bengaluru',
+    distanceKm: 5.4,
     distance: '5.4 km',
+    timeSlots: ['golden', 'night'],
     cover: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=800&q=80',
-    equipment: ['Sony FX3 Cinema Line', 'DJI Mavic 3 Pro Cine', 'DJI RS3 Pro Gimbal', 'Sennheiser Wireless Mics'],
+    equipment: ['Sony FX3 Cinema Line', 'DJI Mavic 3 Pro Cine Drone', 'DJI RS3 Pro Gimbal', 'Sennheiser Wireless Mics'],
     photos: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
       'https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=800&q=80',
@@ -72,17 +81,20 @@ const creators = [
     name: 'Aisha Khan',
     type: 'Photographer',
     tagline: 'High-Fashion & Runway Editorial Director',
+    experience: 9,
     categories: ['Portrait', 'Fashion'],
-    styles: ['Editorial', 'Moody & Dark'],
+    styles: ['Editorial', 'Moody & Dark', 'Fashion'],
     rating: 5.0,
     reviews: 110,
     price: 6499,
     hourly: 2999,
-    location: 'Bengaluru',
-    city: 'Bengaluru',
-    distance: '8.1 km',
+    city: 'Mumbai',
+    location: 'Bandra West, Mumbai',
+    distanceKm: 4.2,
+    distance: '4.2 km',
+    timeSlots: ['morning', 'golden', 'night'],
     cover: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
-    equipment: ['Hasselblad X2D 100C', 'XCD 80mm f/1.9', 'Broncolor Siros 800L'],
+    equipment: ['Hasselblad X2D 100C', 'Sony A7R V', 'Profoto B10X Plus', 'Broncolor Siros 800L'],
     photos: [
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
       'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80'
@@ -93,20 +105,95 @@ const creators = [
     name: 'Rohan Verma',
     type: 'Videographer',
     tagline: 'Architectural, Real Estate & Drone Cinematographer',
+    experience: 4,
     categories: ['Drone', 'Event'],
-    styles: ['Clean & Sharp', 'HDR'],
+    styles: ['HDR', 'Commercial', 'Cinematic'],
     rating: 4.8,
     reviews: 62,
     price: 5499,
     hourly: 2200,
-    location: 'Bengaluru',
     city: 'Bengaluru',
+    location: 'HSR Layout, Bengaluru',
+    distanceKm: 4.6,
     distance: '4.6 km',
+    timeSlots: ['morning', 'golden'],
     cover: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80',
-    equipment: ['Sony A7R V', '16-35mm f/2.8 GM II', 'DJI Inspire 3'],
+    equipment: ['Sony A7R V', '16-35mm f/2.8 GM II', 'DJI Inspire 3 Drone', 'DJI RS3 Gimbal'],
     photos: [
       'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80',
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80'
+    ]
+  },
+  {
+    id: 'photo_vikram_malhotra',
+    name: 'Vikram Malhotra',
+    type: 'Both',
+    tagline: 'Master Wedding Cinematography & Dual Photo-Video Studio',
+    experience: 10,
+    categories: ['Wedding', 'Event', 'Reels'],
+    styles: ['Cinematic', 'Editorial', 'Candid', 'Vibrant & Warm'],
+    rating: 5.0,
+    reviews: 142,
+    price: 14999,
+    hourly: 4999,
+    city: 'Mumbai',
+    location: 'Juhu, Mumbai',
+    distanceKm: 6.8,
+    distance: '6.8 km',
+    timeSlots: ['morning', 'golden', 'night'],
+    cover: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&q=80',
+    equipment: ['Sony FX6 Cinema Line', 'Canon EOS R5 C', 'DJI Mavic 3 Cine Drone', 'DJI Ronin 2 Gimbal', 'Profoto B10 Plus'],
+    photos: [
+      'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&q=80',
+      'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80'
+    ]
+  },
+  {
+    id: 'photo_neha_deshmukh',
+    name: 'Neha Deshmukh',
+    type: 'Photographer',
+    tagline: 'Candid Maternity, Newborn & Lifestyle Artist',
+    experience: 5,
+    categories: ['Portrait', 'Event'],
+    styles: ['Candid', 'Vibrant & Warm', 'Editorial'],
+    rating: 4.8,
+    reviews: 58,
+    price: 3499,
+    hourly: 1800,
+    city: 'Delhi',
+    location: 'Connaught Place, New Delhi',
+    distanceKm: 3.1,
+    distance: '3.1 km',
+    timeSlots: ['morning', 'golden'],
+    cover: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
+    equipment: ['Canon EOS R6 Mark II', 'Canon RF 50mm f/1.2 L', 'Profoto A1X Flash'],
+    photos: [
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80'
+    ]
+  },
+  {
+    id: 'photo_samir_lobo',
+    name: 'Samir Lobo',
+    type: 'Both',
+    tagline: 'Sunset Beach Weddings & Ultra-HD Drone Visuals',
+    experience: 7,
+    categories: ['Wedding', 'Drone', 'Event'],
+    styles: ['Cinematic', 'HDR', 'Vibrant & Warm', 'Candid'],
+    rating: 4.9,
+    reviews: 89,
+    price: 8999,
+    hourly: 3200,
+    city: 'Goa',
+    location: 'Anjuna, North Goa Beach',
+    distanceKm: 2.5,
+    distance: '2.5 km',
+    timeSlots: ['golden', 'night'],
+    cover: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=800&q=80',
+    equipment: ['Sony A7S III', 'DJI Mavic 3 Pro Cine Drone', 'Sony GM 24-70mm f/2.8', 'DJI RS3 Pro Gimbal'],
+    photos: [
+      'https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=800&q=80',
+      'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80'
     ]
   }
 ];
@@ -360,6 +447,105 @@ function renderCreators(list) {
   `).join('');
 }
 
+// Global Central Filter State (Covers all 10 architectural dimensions)
+let filterState = {
+  sort: 'recommended',      // 'recommended', 'distance', 'rating', 'price_asc', 'price_desc'
+  service: 'all',          // 'all', 'Photographer', 'Videographer', 'Both'
+  city: 'all',             // 'all', 'Bengaluru', 'Mumbai', 'Delhi', 'Goa'
+  radius: 50,              // 5, 10, 25, 50
+  date: '2026-09-12',
+  duration: 2,             // 1, 2, 4, 8
+  time: 'any',             // 'any', 'golden', 'morning', 'night'
+  maxPrice: 25000,         // 2000 to 25000
+  minRating: 0,            // 0, 4.5, 4.8, 5.0
+  styles: [],              // Multi-select array e.g. ['Cinematic', 'Editorial']
+  minExp: 0,               // 0, 3, 5, 8
+  equipment: []            // Multi-select array e.g. ['Sony', 'Canon', 'Drone']
+};
+
+function executeFilterQuery() {
+  let list = [...creators];
+
+  // 1. Service Type (Photography, Videography, Both)
+  if (filterState.service !== 'all') {
+    if (filterState.service === 'Both') {
+      list = list.filter(c => c.type === 'Both' || (c.categories.includes('Wedding') && (c.categories.includes('Drone') || c.categories.includes('Reels'))));
+    } else {
+      list = list.filter(c => c.type === filterState.service || c.type === 'Both');
+    }
+  }
+
+  // 2. Location & Search Radius
+  if (filterState.city && filterState.city !== 'all') {
+    list = list.filter(c => c.city.toLowerCase() === filterState.city.toLowerCase() || c.location.toLowerCase().includes(filterState.city.toLowerCase()));
+  }
+  if (filterState.radius) {
+    list = list.filter(c => c.distanceKm <= Number(filterState.radius));
+  }
+
+  // 3. Date & Shoot Timing
+  if (filterState.time && filterState.time !== 'any') {
+    list = list.filter(c => c.timeSlots && c.timeSlots.includes(filterState.time));
+  }
+
+  // 4. Max Price Budget
+  if (filterState.maxPrice) {
+    list = list.filter(c => c.price <= Number(filterState.maxPrice));
+  }
+
+  // 5. Creator Rating
+  if (filterState.minRating > 0) {
+    list = list.filter(c => c.rating >= filterState.minRating);
+  }
+
+  // 6. Experience Level
+  if (filterState.minExp > 0) {
+    list = list.filter(c => c.experience >= filterState.minExp);
+  }
+
+  // 7. Multi-Select Styles / Types
+  if (filterState.styles.length > 0) {
+    list = list.filter(c => filterState.styles.some(st => c.styles.includes(st)));
+  }
+
+  // 8. Multi-Select Camera Gear & Equipment
+  if (filterState.equipment.length > 0) {
+    list = list.filter(c => {
+      const equipStr = (c.equipment || []).join(' ').toLowerCase();
+      return filterState.equipment.some(eq => equipStr.includes(eq.toLowerCase()));
+    });
+  }
+
+  // 9. Explore Header Creator Type Chip (📸 Photographers / 🎬 Videographers / All)
+  if (selectedCreatorType !== 'all') {
+    list = list.filter(c => c.type === selectedCreatorType || c.type === 'Both');
+  }
+
+  // 10. Explore Header Category Chip (Wedding, Portrait, Event, Drone, Reels)
+  if (selectedCategory !== 'All') {
+    list = list.filter(c => c.categories.includes(selectedCategory));
+  }
+
+  // 11. Sort & Ranking Engine (Score based on rating, reviews, and proximity)
+  if (filterState.sort === 'recommended') {
+    list.sort((a, b) => {
+      const scoreA = (a.rating * 20) + (a.reviews * 0.4) - (a.distanceKm * 1.5);
+      const scoreB = (b.rating * 20) + (b.reviews * 0.4) - (b.distanceKm * 1.5);
+      return scoreB - scoreA;
+    });
+  } else if (filterState.sort === 'distance') {
+    list.sort((a, b) => a.distanceKm - b.distanceKm);
+  } else if (filterState.sort === 'rating') {
+    list.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+  } else if (filterState.sort === 'price_asc') {
+    list.sort((a, b) => a.price - b.price);
+  } else if (filterState.sort === 'price_desc') {
+    list.sort((a, b) => b.price - a.price);
+  }
+
+  return list;
+}
+
 function filterCreatorType(type, el) {
   selectedCreatorType = type;
   document.querySelectorAll('#chip-type-all, #chip-type-photo, #chip-type-video').forEach(c => c.classList.remove('active'));
@@ -375,22 +561,82 @@ function setCategory(cat, el) {
 }
 
 function applyActiveFilters() {
-  let list = creators;
+  const filtered = executeFilterQuery();
+  renderCreators(filtered);
+  renderActiveFilterTags();
+}
 
-  if (selectedCreatorType !== 'all') {
-    list = list.filter(c => c.type === selectedCreatorType);
+function renderActiveFilterTags() {
+  const container = document.getElementById('active-filters-bar');
+  if (!container) return;
+
+  const tags = [];
+  if (filterState.service !== 'all') tags.push({ label: `Service: ${filterState.service}`, type: 'service' });
+  if (filterState.city !== 'all') tags.push({ label: `City: ${filterState.city}`, type: 'city' });
+  if (filterState.radius < 50) tags.push({ label: `Within ${filterState.radius}km`, type: 'radius' });
+  if (filterState.maxPrice < 25000) tags.push({ label: `Max ₹${filterState.maxPrice.toLocaleString()}`, type: 'price' });
+  if (filterState.minRating > 0) tags.push({ label: `★ ${filterState.minRating}+`, type: 'rating' });
+  if (filterState.minExp > 0) tags.push({ label: `${filterState.minExp}+ Yrs Exp`, type: 'exp' });
+  if (filterState.time !== 'any') tags.push({ label: `Timing: ${filterState.time}`, type: 'time' });
+  filterState.styles.forEach(st => tags.push({ label: st, type: 'style', val: st }));
+  filterState.equipment.forEach(eq => tags.push({ label: eq, type: 'gear', val: eq }));
+
+  if (tags.length === 0) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
   }
 
-  if (selectedCategory !== 'All') {
-    list = list.filter(c => c.categories.includes(selectedCategory));
-  }
+  container.style.display = 'flex';
+  container.innerHTML = `
+    <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-right: 4px;">ACTIVE:</span>
+    ${tags.map(t => `
+      <span class="filter-active-tag">
+        ${t.label}
+        <i class="fa-solid fa-xmark" onclick="removeActiveFilter('${t.type}', '${t.val || ''}')"></i>
+      </span>
+    `).join('')}
+    <button onclick="resetAllFilters(); applyAdvancedFilters();" style="background: none; border: none; font-size: 11.5px; font-weight: 700; color: #EF4444; cursor: pointer; margin-left: auto;">Clear all</button>
+  `;
+}
 
-  renderCreators(list);
+function removeActiveFilter(type, val) {
+  if (type === 'service') filterState.service = 'all';
+  if (type === 'city') {
+    filterState.city = 'all';
+    const sel = document.getElementById('filter-city-select');
+    if (sel) sel.value = 'all';
+  }
+  if (type === 'radius') {
+    filterState.radius = 50;
+    const sel = document.getElementById('filter-radius-select');
+    if (sel) sel.value = '50';
+  }
+  if (type === 'price') {
+    filterState.maxPrice = 25000;
+    const slider = document.getElementById('filter-price-slider');
+    if (slider) slider.value = 25000;
+    const badge = document.getElementById('filter-price-badge');
+    if (badge) badge.innerText = '₹ 25,000';
+  }
+  if (type === 'rating') filterState.minRating = 0;
+  if (type === 'exp') filterState.minExp = 0;
+  if (type === 'time') filterState.time = 'any';
+  if (type === 'style') filterState.styles = filterState.styles.filter(s => s !== val);
+  if (type === 'gear') filterState.equipment = filterState.equipment.filter(g => g !== val);
+
+  applyActiveFilters();
+  updateFilterQueryCount();
 }
 
 function filterCreators(query) {
   const q = query.toLowerCase().trim();
-  const filtered = creators.filter(c => 
+  if (!q) {
+    applyActiveFilters();
+    return;
+  }
+  const base = executeFilterQuery();
+  const filtered = base.filter(c => 
     c.name.toLowerCase().includes(q) ||
     c.tagline.toLowerCase().includes(q) ||
     c.location.toLowerCase().includes(q) ||
@@ -681,16 +927,159 @@ function switchCreatorPortfolioTab(tab, el) {
 
 function openFilterModal() {
   document.getElementById('modal-filter').classList.add('active');
+  updateFilterQueryCount();
 }
 
 function closeFilterModal() {
   document.getElementById('modal-filter').classList.remove('active');
 }
 
-function applyFilters() {
+function setFilterSort(sort, el) {
+  filterState.sort = sort;
+  document.querySelectorAll('#f-sort-recommended, #f-sort-distance, #f-sort-rating, #f-sort-price-asc, #f-sort-price-desc').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  updateFilterQueryCount();
+}
+
+function setFilterService(service, el) {
+  filterState.service = service;
+  document.querySelectorAll('#f-service-all, #f-service-photo, #f-service-video, #f-service-both').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  updateFilterQueryCount();
+}
+
+function setFilterTime(time, el) {
+  filterState.time = time;
+  document.querySelectorAll('#f-time-any, #f-time-golden, #f-time-morning, #f-time-night').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  updateFilterQueryCount();
+}
+
+function onFilterPriceChange(val) {
+  filterState.maxPrice = Number(val);
+  const badge = document.getElementById('filter-price-badge');
+  if (badge) badge.innerText = `₹ ${Number(val).toLocaleString()}`;
+  updateFilterQueryCount();
+}
+
+function setFilterRating(rating, el) {
+  filterState.minRating = Number(rating);
+  document.querySelectorAll('#f-rating-any, #f-rating-45, #f-rating-48, #f-rating-50').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  updateFilterQueryCount();
+}
+
+function toggleStyleFilter(style, el) {
+  const idx = filterState.styles.indexOf(style);
+  if (idx > -1) {
+    filterState.styles.splice(idx, 1);
+    if (el) el.classList.remove('active');
+  } else {
+    filterState.styles.push(style);
+    if (el) el.classList.add('active');
+  }
+  updateFilterQueryCount();
+}
+
+function setFilterExp(exp, el) {
+  filterState.minExp = Number(exp);
+  document.querySelectorAll('#f-exp-any, #f-exp-3, #f-exp-5, #f-exp-8').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  updateFilterQueryCount();
+}
+
+function toggleGearFilter(gear, el) {
+  const idx = filterState.equipment.indexOf(gear);
+  if (idx > -1) {
+    filterState.equipment.splice(idx, 1);
+    if (el) el.classList.remove('active');
+  } else {
+    filterState.equipment.push(gear);
+    if (el) el.classList.add('active');
+  }
+  updateFilterQueryCount();
+}
+
+function updateFilterQueryCount() {
+  const citySelect = document.getElementById('filter-city-select');
+  const radiusSelect = document.getElementById('filter-radius-select');
+  const dateInput = document.getElementById('filter-date-input');
+  const durationSelect = document.getElementById('filter-duration-select');
+
+  if (citySelect) filterState.city = citySelect.value;
+  if (radiusSelect) filterState.radius = Number(radiusSelect.value);
+  if (dateInput) filterState.date = dateInput.value;
+  if (durationSelect) filterState.duration = Number(durationSelect.value);
+
+  const matched = executeFilterQuery();
+  const applyBtn = document.getElementById('btn-apply-filters');
+  if (applyBtn) {
+    if (matched.length > 0) {
+      applyBtn.innerHTML = `Show ${matched.length} Matching Creator${matched.length > 1 ? 's' : ''} →`;
+      applyBtn.style.opacity = '1';
+      applyBtn.style.pointerEvents = 'auto';
+    } else {
+      applyBtn.innerHTML = `No Matches Found (0) — Adjust Filters`;
+      applyBtn.style.opacity = '0.75';
+    }
+  }
+}
+
+function resetAllFilters() {
+  filterState = {
+    sort: 'recommended',
+    service: 'all',
+    city: 'all',
+    radius: 50,
+    date: '2026-09-12',
+    duration: 2,
+    time: 'any',
+    maxPrice: 25000,
+    minRating: 0,
+    styles: [],
+    minExp: 0,
+    equipment: []
+  };
+
+  // Reset UI components
+  const citySelect = document.getElementById('filter-city-select');
+  if (citySelect) citySelect.value = 'all';
+
+  const radiusSelect = document.getElementById('filter-radius-select');
+  if (radiusSelect) radiusSelect.value = '50';
+
+  const priceSlider = document.getElementById('filter-price-slider');
+  if (priceSlider) priceSlider.value = 25000;
+
+  const priceBadge = document.getElementById('filter-price-badge');
+  if (priceBadge) priceBadge.innerText = '₹ 25,000';
+
+  // Reset chip active classes
+  document.querySelectorAll('#modal-filter .category-chip').forEach(c => c.classList.remove('active'));
+  const defChips = [
+    'f-sort-recommended',
+    'f-service-all',
+    'f-time-any',
+    'f-rating-any',
+    'f-exp-any'
+  ];
+  defChips.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
+  });
+
+  updateFilterQueryCount();
+}
+
+function applyAdvancedFilters() {
   closeFilterModal();
   applyActiveFilters();
-  showToast('Filters applied successfully');
+  const matched = executeFilterQuery();
+  showToast(`✨ Filtered: ${matched.length} creator${matched.length !== 1 ? 's' : ''} found`);
+}
+
+function applyFilters() {
+  applyAdvancedFilters();
 }
 
 function openLocationModal() {
