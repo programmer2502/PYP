@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#00A86B">
+  <title>Download PYP Android App (APK)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #00A86B;
+      --primary-dark: #008756;
+      --primary-light: #E8F8F2;
+      --bg: #0B132B;
+      --card-bg: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .download-card {
+      width: 100%;
+      max-width: 440px;
+      background: #FFF;
+      border-radius: 28px;
+      padding: 32px 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+    .app-logo-box {
+      width: 88px;
+      height: 88px;
+      border-radius: 22px;
+      background: #000;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 168, 107, 0.35);
+      border: 3px solid #FFF;
+    }
+    .app-logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      margin-top: 16px;
+    }
+    .tagline {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .qr-container {
+      background: #F8FAFC;
+      border: 1.5px dashed var(--primary);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 24px 0 18px;
+      display: inline-block;
+    }
+    .qr-img {
+      width: 180px;
+      height: 180px;
+      border-radius: 12px;
+      display: block;
+    }
+    .btn-download {
+      background: var(--primary);
+      color: #FFF;
+      border: none;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      box-shadow: 0 8px 24px rgba(0, 168, 107, 0.35);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .btn-download:active {
+      transform: scale(0.97);
+      background: var(--primary-dark);
+    }
+    .apk-meta {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .instructions {
+      background: #F8FAFC;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: left;
+      margin-top: 22px;
+      border: 1px solid var(--border);
+    }
+    .instructions h4 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .instructions ol {
+      padding-left: 18px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="download-card">
+    <div class="app-logo-box">
+      <img src="app_logo.png" alt="PYP Logo">
+    </div>
+    <h1>PYP Mobile App</h1>
+    <p class="tagline">Pick Your Photographer • Android APK</p>
+
+    <!-- QR Code for Instant Phone Scan -->
+    <div class="qr-container">
+      <img id="qr-code-img" class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=http://192.168.1.13:5000/download-apk" alt="Scan QR code with phone">
+      <div style="font-size: 11px; font-weight: 700; color: var(--primary-dark); margin-top: 8px;">
+        <i class="fa-solid fa-qrcode"></i> Scan with Phone Camera to Download
+      </div>
+    </div>
+
+    <!-- Direct Download Button -->
+    <a href="/download-apk" class="btn-download">
+      <i class="fa-brands fa-android" style="font-size: 20px;"></i>
+      Download APK (159 MB)
+    </a>
+
+    <div class="apk-meta">
+      <span><i class="fa-solid fa-shield-check" style="color: var(--primary);"></i> Verified Safe</span>
+      <span>•</span>
+      <span>Version 1.0.0 (Release)</span>
+      <span>•</span>
+      <span>Android 8.0+</span>
+    </div>
+
+    <!-- Installation Steps -->
+    <div class="instructions">
+      <h4><i class="fa-solid fa-circle-info" style="color: var(--primary);"></i> How to install on your phone:</h4>
+      <ol>
+        <li>Scan the QR code or tap <strong>Download APK</strong>.</li>
+        <li>Once downloaded, open the <strong>PYP-PickYourPhotographer.apk</strong> file.</li>
+        <li>If prompted, tap <em>"Settings"</em> $\rightarrow$ <em>"Allow from this source"</em>.</li>
+        <li>Tap <strong>Install</strong> and enjoy PYP on your phone!</li>
+      </ol>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <a href="/" style="font-size: 13px; font-weight: 700; color: var(--primary); text-decoration: none;">
+        ← Back to Mobile Web App
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // Auto detect current host for QR code if opened on LAN
+    const host = window.location.hostname || '192.168.1.13';
+    const port = window.location.port || '5000';
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=http://${host}:${port}/download-apk`;
+    const qrImg = document.getElementById('qr-code-img');
+    if (qrImg) qrImg.src = qrUrl;
+  </script>
+</body>
+</html>

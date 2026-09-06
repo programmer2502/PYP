@@ -13,10 +13,35 @@ const MIME_TYPES = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon'
+  '.ico': 'image/x-icon',
+  '.apk': 'application/vnd.android.package-archive'
 };
 
+const APK_PATH = path.join(__dirname, '..', 'PYP-PickYourPhotographer.apk');
+
 const server = http.createServer((req, res) => {
+  const urlPath = req.url.split('?')[0];
+
+  // Direct APK Download Endpoint
+  if (urlPath === '/download-apk' || urlPath === '/PYP-PickYourPhotographer.apk' || urlPath === '/pyp.apk') {
+    if (fs.existsSync(APK_PATH)) {
+      const stat = fs.statSync(APK_PATH);
+      res.writeHead(200, {
+        'Content-Type': 'application/vnd.android.package-archive',
+        'Content-Disposition': 'attachment; filename="PYP-PickYourPhotographer.apk"',
+        'Content-Length': stat.size,
+        'Access-Control-Allow-Origin': '*'
+      });
+      const readStream = fs.createReadStream(APK_PATH);
+      readStream.pipe(res);
+      return;
+    } else {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('APK file not found on server');
+      return;
+    }
+  }
+
   let reqUrl = req.url === '/' ? '/index.html' : req.url;
   let filePath = path.join(PUBLIC_DIR, reqUrl.split('?')[0]);
 
