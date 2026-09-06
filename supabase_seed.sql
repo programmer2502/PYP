@@ -130,7 +130,23 @@ CREATE TABLE IF NOT EXISTS public.deliverables (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Relax NOT NULL constraints for flexible client & seed usage
+-- 3. Relax constraints for flexible client & seed usage (remove auth.users foreign key lock)
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (
+        SELECT constraint_name 
+        FROM information_schema.table_constraints 
+        WHERE table_schema = 'public' 
+          AND table_name = 'users' 
+          AND constraint_type = 'FOREIGN KEY'
+    ) LOOP
+        EXECUTE 'ALTER TABLE public.users DROP CONSTRAINT IF EXISTS ' || quote_ident(r.constraint_name) || ' CASCADE';
+    END LOOP;
+END $$;
+
+ALTER TABLE IF EXISTS public.users DROP CONSTRAINT IF EXISTS users_id_fkey;
 ALTER TABLE IF EXISTS public.reviews ALTER COLUMN customer_id DROP NOT NULL;
 ALTER TABLE IF EXISTS public.reviews ALTER COLUMN booking_id DROP NOT NULL;
 ALTER TABLE IF EXISTS public.bookings ALTER COLUMN customer_id DROP NOT NULL;
