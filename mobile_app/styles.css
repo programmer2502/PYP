@@ -260,6 +260,21 @@ body {
   cursor: pointer;
 }
 
+/* Category Slider with Rounded Square Thumbnails */
+.categories-slider {
+  display: flex;
+  gap: 14px;
+  padding: 10px 18px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: #FFF;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.categories-slider::-webkit-scrollbar {
+  display: none;
+}
+
 .category-item {
   display: flex;
   flex-direction: column;
