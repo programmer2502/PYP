@@ -803,18 +803,18 @@
     </div>
 
     <!-- 13B. INTERACTIVE CHAT ROOM SCREEN -->
-    <div id="screen-chat-room" class="screen" style="padding-bottom: 0; display: flex; flex-direction: column; height: 100%;">
+    <div id="screen-chat-room" class="screen">
       <!-- Chat Room Header -->
       <div class="app-header" style="padding: 10px 16px;">
         <div style="display: flex; align-items: center; gap: 10px;">
           <button onclick="goToScreen('screen-chats')" class="icon-btn" style="width: 34px; height: 34px;"><i class="fa-solid fa-arrow-left"></i></button>
           <div style="position: relative;">
-            <img id="chat-room-avatar" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+            <img id="chat-room-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
             <div style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #10B981; border: 1.5px solid #FFF; border-radius: 50%;"></div>
           </div>
           <div>
             <div style="display: flex; align-items: center; gap: 4px;">
-              <span id="chat-room-name" style="font-family: 'Outfit'; font-weight: 800; font-size: 15px;"></span>
+              <span id="chat-room-name" style="font-family: 'Outfit'; font-weight: 800; font-size: 15px;">Arjun Mehta</span>
               <i class="fa-solid fa-circle-check" style="color: var(--primary); font-size: 12px;"></i>
             </div>
             <div style="font-size: 11px; color: #10B981; font-weight: 600;">Online • Typically replies instantly</div>
@@ -832,7 +832,7 @@
       </div>
 
       <!-- Chat Bottom Input Bar -->
-      <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: #FFF; border-top: 1px solid var(--border); padding: 10px 14px; display: flex; align-items: center; gap: 8px; z-index: 50;">
+      <div class="chat-input-bar">
         <button onclick="showToast('Upload reference photo/moodboard...')" style="width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: #F8FAFC; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center;">
           <i class="fa-solid fa-paperclip"></i>
         </button>

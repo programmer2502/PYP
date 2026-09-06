@@ -38,13 +38,15 @@ body {
   width: 100%;
   max-width: 440px;
   height: 100vh;
-  max-height: 920px;
+  max-height: 900px;
   background: var(--bg);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  border-radius: 36px;
+  border: 8px solid #1E293B;
 }
 
 @media (max-width: 480px) {
@@ -53,6 +55,7 @@ body {
     height: 100vh;
     max-height: 100%;
     border-radius: 0;
+    border: none;
   }
 }
 
@@ -74,6 +77,27 @@ body {
 
 #screen-splash.active {
   display: flex;
+}
+
+#screen-chat-room.active {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+  height: 100%;
+}
+
+.chat-input-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #FFF;
+  border-top: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 50;
 }
 
 /* Header */
