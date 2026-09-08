@@ -17,8 +17,13 @@ subprojects {
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             project.android {
-                if (namespace == null) {
-                    namespace project.group
+                compileSdkVersion 34
+                try {
+                    if (namespace == null || (namespace instanceof String && namespace.trim().isEmpty())) {
+                        namespace = "com.pyp.plugin.${project.name.replaceAll('[^a-zA-Z0-9_]', '_')}"
+                    }
+                } catch (Exception ignored) {
+                    namespace = "com.pyp.plugin.${project.name.replaceAll('[^a-zA-Z0-9_]', '_')}"
                 }
             }
         }
