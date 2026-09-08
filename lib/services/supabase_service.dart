@@ -191,12 +191,35 @@ class SupabaseService {
     }
   }
 
-  Future<void> updateBookingStatus(String bookingId, String status) async {
+  Future<BookingModel> createBookingWithTransaction(BookingModel booking) async {
     try {
-      await _client
-          .from('bookings')
-          .update({'status': status, 'updated_at': DateTime.now().toIso8601String()})
-          .eq('id', bookingId);
+      await _client.from('bookings').insert(booking.toMap());
+      return booking;
+    } catch (e) {
+      debugPrint('SupabaseService.createBookingWithTransaction error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateBookingStatus({
+    required String bookingId,
+    required String status,
+    String? paymentId,
+    String? paymentStatus,
+    String? cancellationReason,
+    String? cancelledBy,
+  }) async {
+    try {
+      final Map<String, dynamic> updates = {
+        'status': status,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+      if (paymentId != null) updates['payment_id'] = paymentId;
+      if (paymentStatus != null) updates['payment_status'] = paymentStatus;
+      if (cancellationReason != null) updates['cancellation_reason'] = cancellationReason;
+      if (cancelledBy != null) updates['cancelled_by'] = cancelledBy;
+
+      await _client.from('bookings').update(updates).eq('id', bookingId);
     } catch (e) {
       debugPrint('SupabaseService.updateBookingStatus error: $e');
       rethrow;
@@ -249,6 +272,8 @@ class SupabaseService {
       rethrow;
     }
   }
+
+  Future<void> submitReview({required ReviewModel review}) async => addReview(review);
 
   // --------------------------------------------------------------------------
   // DELIVERABLES
