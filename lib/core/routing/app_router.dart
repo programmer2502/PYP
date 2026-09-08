@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../models/booking_model.dart';
 import '../../models/package_model.dart';
 import '../../models/photographer_model.dart';
-import '../../providers/auth_provider.dart';
 import '../../screens/auth/forgot_password_screen.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/otp_verification_screen.dart';

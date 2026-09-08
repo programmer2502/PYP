@@ -14,6 +14,7 @@ import '../../models/booking_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/photographer_provider.dart';
+import '../../services/supabase_service.dart';
 
 class BookingDetailScreen extends ConsumerStatefulWidget {
   final String bookingId;

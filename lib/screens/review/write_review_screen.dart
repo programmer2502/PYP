@@ -12,6 +12,8 @@ import '../../models/booking_model.dart';
 import '../../models/review_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/photographer_provider.dart';
+import '../../services/storage_service.dart';
+import '../../services/supabase_service.dart';
 
 class WriteReviewScreen extends ConsumerStatefulWidget {
   final BookingModel booking;
@@ -250,7 +252,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
                               onTap: () => setState(() => _selectedPhotos.remove(file)),
                               child: Container(
                                 padding: const EdgeInsets.all(2),
-                                decoration: const BoxDecoration(color: Colors.black82, shape: BoxShape.circle),
+                                decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle),
                                 child: const Icon(Icons.close, size: 14, color: Colors.white),
                               ),
                             ),

@@ -49,4 +49,10 @@ class Validators {
     }
     return null;
   }
+
+  static String? validateOtp(String? value) => otp(value);
+  static String? validatePhone(String? value) => phone(value);
+  static String? validateEmail(String? value) => email(value);
+  static String? validatePassword(String? value) => password(value);
+  static String? validateRequired(String? value, [String message = 'This field is required']) => required(value, message);
 }

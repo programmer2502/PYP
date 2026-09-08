@@ -80,8 +80,6 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locationState = ref.watch(locationProvider);
-
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(

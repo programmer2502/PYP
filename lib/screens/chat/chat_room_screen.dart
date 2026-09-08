@@ -341,7 +341,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           Stack(
             children: [
               AvatarView(
-                imageUrl: convo?.creatorAvatar,
+                avatarUrl: convo?.creatorAvatar,
                 name: creatorName,
                 radius: 20,
               ),

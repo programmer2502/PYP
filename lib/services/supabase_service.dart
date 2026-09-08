@@ -203,6 +203,24 @@ class SupabaseService {
     }
   }
 
+  Future<List<String>> getBookedSlots(String photographerId, DateTime date) async {
+    try {
+      final start = DateTime(date.year, date.month, date.day);
+      final end = start.add(const Duration(days: 1));
+      final response = await _client
+          .from('bookings')
+          .select('time_slot')
+          .eq('photographer_id', photographerId)
+          .gte('shoot_date', start.toIso8601String())
+          .lt('shoot_date', end.toIso8601String());
+
+      return (response as List).map((e) => e['time_slot'].toString()).toList();
+    } catch (e) {
+      debugPrint('SupabaseService.getBookedSlots error: $e');
+      return [];
+    }
+  }
+
   // --------------------------------------------------------------------------
   // REVIEWS
   // --------------------------------------------------------------------------

@@ -46,8 +46,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     try {
       final authService = ref.read(authServiceProvider);
       await authService.verifyPhoneOtp(
+        verificationId: widget.verificationId ?? 'demo_verification',
+        smsCode: _otpController.text.trim(),
         phoneNumber: widget.phone,
-        token: _otpController.text.trim(),
       );
 
       if (mounted) {
@@ -129,9 +130,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                 const SizedBox(height: 32),
                 CustomTextField(
                   label: '6-Digit Code',
-                  hint: '123456',
+                  hintText: '123456',
                   controller: _otpController,
-                  prefixIcon: Icons.pin_outlined,
+                  prefixIcon: const Icon(Icons.pin_outlined, color: AppColors.textSecondaryLight),
                   keyboardType: TextInputType.number,
                   validator: Validators.validateOtp,
                 ),

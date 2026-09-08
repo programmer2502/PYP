@@ -8,7 +8,6 @@ import '../../core/constants/app_constants.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/custom_button.dart';
-import '../../core/widgets/custom_text_field.dart';
 import '../../core/widgets/loading_indicator.dart';
 import '../../models/package_model.dart';
 import '../../models/photographer_model.dart';

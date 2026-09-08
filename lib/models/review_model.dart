@@ -10,6 +10,8 @@ class ReviewModel {
   final List<String> photos;
   final DateTime createdAt;
 
+  String get userName => customerName;
+
   ReviewModel({
     required this.id,
     required this.bookingId,

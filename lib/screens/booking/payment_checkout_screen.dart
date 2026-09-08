@@ -13,6 +13,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/photographer_provider.dart';
 import '../../services/payment_service.dart';
+import '../../services/supabase_service.dart';
 
 class PaymentCheckoutScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> bookingData;

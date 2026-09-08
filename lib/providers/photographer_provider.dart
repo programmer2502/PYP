@@ -4,7 +4,6 @@ import '../models/package_model.dart';
 import '../models/review_model.dart';
 import '../models/filter_model.dart';
 import '../services/supabase_service.dart';
-import '../services/storage_service.dart';
 import '../services/filter_engine_service.dart';
 import 'location_provider.dart';
 

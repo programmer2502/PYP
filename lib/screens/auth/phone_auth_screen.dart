@@ -43,17 +43,30 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
     }
 
     try {
-      await authService.sendPhoneOtp(rawPhone);
-      if (mounted) {
-        setState(() => _isLoading = false);
-        context.push(
-          '/otp-verify',
-          extra: {
-            'phone': rawPhone,
-            'name': _nameController.text.trim(),
-          },
-        );
-      }
+      await authService.sendPhoneOtp(
+        phoneNumber: rawPhone,
+        onCodeSent: (verificationId, resendToken) {
+          if (mounted) {
+            setState(() => _isLoading = false);
+            context.push(
+              '/otp-verify',
+              extra: {
+                'phone': rawPhone,
+                'name': _nameController.text.trim(),
+                'verificationId': verificationId,
+              },
+            );
+          }
+        },
+        onError: (error) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+              _errorMessage = error;
+            });
+          }
+        },
+      );
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -125,17 +138,17 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
                 const SizedBox(height: 32),
                 CustomTextField(
                   label: 'Full Name',
-                  hint: 'Naveen Kumar',
+                  hintText: 'Naveen Kumar',
                   controller: _nameController,
-                  prefixIcon: Icons.person_outline_rounded,
+                  prefixIcon: const Icon(Icons.person_outline_rounded, color: AppColors.textSecondaryLight),
                   validator: (val) => val == null || val.trim().isEmpty ? 'Please enter your name' : null,
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
                   label: 'Phone Number',
-                  hint: '98200 12345',
+                  hintText: '98200 12345',
                   controller: _phoneController,
-                  prefixIcon: Icons.phone_outlined,
+                  prefixIcon: const Icon(Icons.phone_outlined, color: AppColors.textSecondaryLight),
                   keyboardType: TextInputType.phone,
                   validator: Validators.validatePhone,
                 ),

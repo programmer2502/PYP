@@ -4,7 +4,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_message_model.dart';
 import '../models/conversation_model.dart';
 import '../core/supabase/supabase_config.dart';
-import 'supabase_service.dart';
 import 'notification_service.dart';
 
 /// Conversation API, Supabase Realtime Stream & Notifications Layer

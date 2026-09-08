@@ -56,12 +56,11 @@ class FilterEngineService {
 
     if (filter.maxDistanceKm != null && userLat != null && userLon != null) {
       candidates = candidates.where((p) {
-        if (p.latitude == null || p.longitude == null) return true;
         final dist = _calculateHaversineDistance(
           userLat,
           userLon,
-          p.latitude!,
-          p.longitude!,
+          p.latitude,
+          p.longitude,
         );
         return dist <= filter.maxDistanceKm!;
       }).toList();
@@ -101,9 +100,9 @@ class FilterEngineService {
     String? requestedTimeSlot,
   }) async {
     try {
-      final bookedSlots = await _firestoreService.getBookedSlots(
-        photographerId: photographerId,
-        date: requestedDate,
+      final bookedSlots = await _supabaseService.getBookedSlots(
+        photographerId,
+        requestedDate,
       );
 
       if (requestedTimeSlot != null && requestedTimeSlot.isNotEmpty) {
@@ -137,7 +136,7 @@ class FilterEngineService {
           score += 40.0;
           highlights.add('Name match');
         }
-        if (p.bio != null && p.bio!.toLowerCase().contains(query)) {
+        if (p.bio.toLowerCase().contains(query)) {
           score += 20.0;
         }
         if (p.specialties.any((s) => s.toLowerCase().contains(query))) {

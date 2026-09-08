@@ -22,9 +22,11 @@ class PhotographerModel {
   final String geohash;
   final bool isVerified;
   final bool isAvailable;
-  final List<String> portfolioImages;
   final List<String> portfolioVideos;
   final DateTime createdAt;
+
+  List<String> get portfolioUrls => portfolioImages;
+  List<String> get specialties => categories;
 
   PhotographerModel({
     required this.id,

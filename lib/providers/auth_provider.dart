@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/supabase_service.dart';
@@ -9,10 +9,16 @@ final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService();
 });
 
-// Supabase Auth user stream provider
-final authStateStreamProvider = StreamProvider<User?>((ref) {
+// Firebase Auth user stream provider
+final authStateStreamProvider = StreamProvider<fb_auth.User?>((ref) {
   final authService = ref.watch(authServiceProvider);
   return authService.authStateChanges;
+});
+
+// Current Firebase User provider
+final currentUserProvider = Provider<fb_auth.User?>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  return authService.currentUser;
 });
 
 // Current UserModel state notifier
@@ -31,7 +37,7 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
         state = const AsyncValue.data(null);
       } else {
         try {
-          final userModel = await _dbService.getUserProfile(user.id);
+          final userModel = await _dbService.getUserProfile(user.uid);
           state = AsyncValue.data(userModel);
         } catch (e, st) {
           state = AsyncValue.error(e, st);
@@ -57,7 +63,7 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     if (user != null) {
       state = const AsyncValue.loading();
       try {
-        final userModel = await _dbService.getUserProfile(user.id);
+        final userModel = await _dbService.getUserProfile(user.uid);
         state = AsyncValue.data(userModel);
       } catch (e, st) {
         state = AsyncValue.error(e, st);

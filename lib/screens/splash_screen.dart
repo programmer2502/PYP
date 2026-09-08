@@ -53,7 +53,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
 
     try {
-      final userProfile = await ref.read(userProfileProvider.future);
+      final userProfile = ref.read(userProfileProvider).value;
       if (!mounted) return;
 
       if (userProfile?.role == 'photographer') {

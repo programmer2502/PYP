@@ -33,7 +33,6 @@ class _PhotographerDetailScreenState
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   PackageModel? _selectedPackage;
-  DateTime _focusedDay = DateTime.now();
   DateTime? _selectedCalendarDay;
   String _selectedSlot = '02:00 PM';
   bool _isSaved = false;
@@ -137,10 +136,6 @@ class _PhotographerDetailScreenState
                           ),
                           onPressed: () {
                             setState(() => _isSaved = !_isSaved);
-                            ref.read(photographerRepositoryProvider).toggleSavePhotographer(
-                                  userId: 'current_user',
-                                  photographerId: photographer.id,
-                                );
                           },
                         ),
                       ),

@@ -107,8 +107,8 @@ class CategoryService {
 
   Future<List<CategoryModel>> getCategories() async {
     try {
-      final snapshot = await _firestoreService.getPhotographers(limit: 1);
-      // Return predefined catalog enriched with Firestore dynamics
+      await _supabaseService.getPhotographers(limit: 1);
+      // Return predefined catalog enriched with database dynamics
       return defaultCategories;
     } catch (_) {
       return defaultCategories;

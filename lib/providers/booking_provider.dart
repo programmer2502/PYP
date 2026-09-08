@@ -38,3 +38,9 @@ final singleBookingStreamProvider =
     return list.firstWhere((b) => b.id == bookingId, orElse: () => list.first);
   });
 });
+
+// Booked slots family provider
+final bookedSlotsProvider = FutureProvider.family<List<String>, ({String photographerId, DateTime date})>((ref, arg) async {
+  final supabaseService = ref.watch(supabaseServiceProvider);
+  return supabaseService.getBookedSlots(arg.photographerId, arg.date);
+});
