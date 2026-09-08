@@ -41,23 +41,9 @@ jobs:
 
       - name: Build Android Release APK
         run: |
-          set +e
-          flutter build apk --release --no-tree-shake-icons --verbose > build_log.txt 2>&1
-          EXIT_CODE=$?
-          if [ $EXIT_CODE -ne 0 ]; then
-            echo "=== BUILD LOG FAILURE TAIL ==="
-            tail -n 150 build_log.txt
-            exit $EXIT_CODE
-          fi
-          echo "=== BUILD SUCCEEDED ==="
+          flutter build apk --release --no-tree-shake-icons --verbose
           cp build/app/outputs/flutter-apk/app-release.apk ./PYP-PickYourPhotographer.apk
 
-      - name: Upload Build Log on Failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: flutter-build-failure-log
-          path: build_log.txt
 
       - name: Upload Release APK Artifact
         if: success()
