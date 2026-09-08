@@ -41,8 +41,23 @@ jobs:
 
       - name: Build Android Release APK
         run: |
-          flutter build apk --release --no-tree-shake-icons --verbose
+          set -o pipefail
+          flutter build apk --release --no-tree-shake-icons --verbose 2>&1 | tee /tmp/flutter_build.log
           cp build/app/outputs/flutter-apk/app-release.apk ./PYP-PickYourPhotographer.apk
+
+      - name: Publish Diagnostics on Failure
+        if: failure()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0-diagnostics
+          name: "Build Failure Diagnostics"
+          body: "Build failed on runner. Log attached."
+          draft: false
+          prerelease: true
+          files: |
+            /tmp/flutter_build.log
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
       - name: Upload Release APK Artifact
