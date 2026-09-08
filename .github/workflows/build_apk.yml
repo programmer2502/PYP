@@ -28,33 +28,9 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Generate Canonical Android Scaffolding & Firebase Setup
+      - name: Verify Android & Firebase Configuration
         run: |
-          echo "Generating official Android platform scaffolding..."
-          rm -rf android
-          flutter create --platforms=android --org=com.pyp.lensmatch temp_platform
-          cp -r temp_platform/android ./android
-          rm -rf temp_platform
-          
-          # Copy live google-services.json into android/app
           cp google-services.json android/app/google-services.json
-          
-          # Configure Google Services Gradle plugins
-          if [ -f "android/settings.gradle" ]; then
-            sed -i '/plugins {/a \    id "com.google.gms.google-services" version "4.4.2" apply false' android/settings.gradle
-          fi
-          
-          # Configure minSdk 21, Google Services and core library desugaring in app/build.gradle
-          if [ -f "android/app/build.gradle" ]; then
-            sed -i '/plugins {/a \    id "com.google.gms.google-services"' android/app/build.gradle
-            sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
-            sed -i 's/minSdk = .*/minSdk = 21/g' android/app/build.gradle
-            sed -i 's/compileOptions {/compileOptions {\n        coreLibraryDesugaringEnabled true/g' android/app/build.gradle
-            echo "" >> android/app/build.gradle
-            echo "dependencies {" >> android/app/build.gradle
-            echo "    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'" >> android/app/build.gradle
-            echo "}" >> android/app/build.gradle
-          fi
 
       - name: Install Flutter Dependencies
         run: flutter pub get
