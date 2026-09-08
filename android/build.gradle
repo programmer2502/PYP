@@ -13,23 +13,6 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 
-subprojects {
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            project.android {
-                compileSdkVersion 34
-                try {
-                    if (namespace == null || (namespace instanceof String && namespace.trim().isEmpty())) {
-                        namespace = "com.pyp.plugin.${project.name.replaceAll('[^a-zA-Z0-9_]', '_')}"
-                    }
-                } catch (Exception ignored) {
-                    namespace = "com.pyp.plugin.${project.name.replaceAll('[^a-zA-Z0-9_]', '_')}"
-                }
-            }
-        }
-    }
-}
-
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
