@@ -18,8 +18,8 @@ def flutterVersionName = localProperties.getProperty('flutter.versionName') ?: '
 
 android {
     namespace "com.pyp.lensmatch"
-    compileSdkVersion 34
-    ndkVersion = "25.1.8937393"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
 
     compileOptions {
         coreLibraryDesugaringEnabled true
@@ -38,7 +38,7 @@ android {
     defaultConfig {
         applicationId "com.pyp.lensmatch"
         minSdkVersion 23
-        targetSdkVersion 34
+        targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
