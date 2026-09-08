@@ -36,8 +36,11 @@ const server = http.createServer((req, res) => {
       readStream.pipe(res);
       return;
     } else {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('APK file not found on server');
+      // Fallback: Redirect directly to GitHub Release APK asset
+      res.writeHead(302, {
+        'Location': 'https://github.com/programmer2502/PYP/releases/download/v1.0.0/PYP-PickYourPhotographer.apk'
+      });
+      res.end();
       return;
     }
   }

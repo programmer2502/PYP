@@ -154,16 +154,16 @@
 
     <!-- QR Code for Instant Phone Scan -->
     <div class="qr-container">
-      <img id="qr-code-img" class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=http://192.168.1.13:5000/download-apk" alt="Scan QR code with phone">
+      <img id="qr-code-img" class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://github.com/programmer2502/PYP/releases/download/v1.0.0/PYP-PickYourPhotographer.apk" alt="Scan QR code with phone">
       <div style="font-size: 11px; font-weight: 700; color: var(--primary-dark); margin-top: 8px;">
-        <i class="fa-solid fa-qrcode"></i> Scan with Phone Camera to Download
+        <i class="fa-solid fa-qrcode"></i> Scan with Phone Camera to Download Directly
       </div>
     </div>
 
     <!-- Direct Download Button -->
-    <a href="/download-apk" class="btn-download">
+    <a id="btn-download-link" href="https://github.com/programmer2502/PYP/releases/download/v1.0.0/PYP-PickYourPhotographer.apk" class="btn-download" target="_blank">
       <i class="fa-brands fa-android" style="font-size: 20px;"></i>
-      Download APK (159 MB)
+      Download APK (Universal)
     </a>
 
     <div class="apk-meta">
@@ -178,9 +178,9 @@
     <div class="instructions">
       <h4><i class="fa-solid fa-circle-info" style="color: var(--primary);"></i> How to install on your phone:</h4>
       <ol>
-        <li>Scan the QR code or tap <strong>Download APK</strong>.</li>
-        <li>Once downloaded, open the <strong>PYP-PickYourPhotographer.apk</strong> file.</li>
-        <li>If prompted, tap <em>"Settings"</em> $\rightarrow$ <em>"Allow from this source"</em>.</li>
+        <li>Scan the QR code with your phone camera or tap <strong>Download APK</strong>.</li>
+        <li>Once downloaded, tap to open the <strong>PYP-PickYourPhotographer.apk</strong> file.</li>
+        <li>If prompted, tap <em>"Settings"</em> &rarr; <em>"Allow from this source"</em>.</li>
         <li>Tap <strong>Install</strong> and enjoy PYP on your phone!</li>
       </ol>
     </div>
@@ -193,12 +193,12 @@
   </div>
 
   <script>
-    // Auto detect current host for QR code if opened on LAN
-    const host = window.location.hostname || '192.168.1.13';
-    const port = window.location.port || '5000';
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=http://${host}:${port}/download-apk`;
+    // Universal direct APK release download
+    const apkReleaseUrl = 'https://github.com/programmer2502/PYP/releases/download/v1.0.0/PYP-PickYourPhotographer.apk';
     const qrImg = document.getElementById('qr-code-img');
-    if (qrImg) qrImg.src = qrUrl;
+    if (qrImg) {
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(apkReleaseUrl)}`;
+    }
   </script>
 </body>
 </html>

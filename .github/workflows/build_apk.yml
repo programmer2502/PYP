@@ -7,6 +7,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Android Release APK
@@ -40,9 +43,13 @@ jobs:
           set +e
           flutter build apk --release --no-tree-shake-icons --verbose > build_log.txt 2>&1
           EXIT_CODE=$?
-          echo "=== BUILD LOG TAIL ==="
-          tail -n 150 build_log.txt
-          exit $EXIT_CODE
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "=== BUILD LOG FAILURE TAIL ==="
+            tail -n 150 build_log.txt
+            exit $EXIT_CODE
+          fi
+          echo "=== BUILD SUCCEEDED ==="
+          cp build/app/outputs/flutter-apk/app-release.apk ./PYP-PickYourPhotographer.apk
 
       - name: Upload Build Log on Failure
         if: failure()
@@ -56,4 +63,28 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PYP-PickYourPhotographer-Release-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: ./PYP-PickYourPhotographer.apk
+
+      - name: Publish GitHub Release with APK
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "PYP Mobile App v1.0.0 (Release APK)"
+          body: |
+            ### 📸 PYP - Pick Your Photographer Android App
+            Official Android Release v1.0.0
+            
+            #### Direct Phone Installation:
+            - **Download APK**: [PYP-PickYourPhotographer.apk](https://github.com/programmer2502/PYP/releases/download/v1.0.0/PYP-PickYourPhotographer.apk)
+            
+            #### Installation Instructions:
+            1. Download the APK file on your Android phone.
+            2. Tap the downloaded file to install.
+            3. If prompted, enable **Allow from this source**.
+          draft: false
+          prerelease: false
+          files: |
+            ./PYP-PickYourPhotographer.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
