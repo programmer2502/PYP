@@ -9,7 +9,6 @@ import '../../core/widgets/avatar_view.dart';
 import '../../core/widgets/custom_button.dart';
 import '../../core/widgets/custom_text_field.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/photographer_provider.dart';
 import '../../services/storage_service.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {

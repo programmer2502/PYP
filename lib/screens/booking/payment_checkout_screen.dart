@@ -5,13 +5,11 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/widgets/custom_button.dart';
-import '../../core/widgets/loading_indicator.dart';
 import '../../models/booking_model.dart';
 import '../../models/package_model.dart';
 import '../../models/photographer_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
-import '../../providers/photographer_provider.dart';
 import '../../services/payment_service.dart';
 import '../../services/supabase_service.dart';
 

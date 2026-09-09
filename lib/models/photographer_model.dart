@@ -96,32 +96,29 @@ class PhotographerModel {
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    final map = <String, dynamic>{
       'id': id,
-      'user_id': userId,
       'name': name,
-      'email': email,
-      'phone': phone,
-      'avatar_url': avatarUrl,
-      'cover_url': coverImageUrl,
       'bio': bio,
       'tagline': tagline,
-      'categories': categories,
-      'styles': styles,
-      'equipment': equipment,
-      'starting_price': startingPrice,
-      'hourly_rate': hourlyRate,
-      'rating': rating,
-      'review_count': reviewCount,
-      'experience_years': experienceYears,
       'location': location,
       'latitude': latitude,
       'longitude': longitude,
+      'starting_price': startingPrice,
+      'rating': rating,
+      'review_count': reviewCount,
+      'experience_years': experienceYears,
       'is_verified': isVerified,
       'is_available': isAvailable,
+      'categories': categories,
+      'styles': styles,
+      'equipment': equipment,
       'portfolio_images': portfolioImages,
-      'portfolio_videos': portfolioVideos,
       'created_at': createdAt.toIso8601String(),
     };
+    if (userId != null && userId!.isNotEmpty) map['user_id'] = userId;
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) map['avatar_url'] = avatarUrl;
+    if (coverImageUrl != null && coverImageUrl!.isNotEmpty) map['cover_url'] = coverImageUrl;
+    return map;
   }
 }

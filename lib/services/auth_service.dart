@@ -10,7 +10,14 @@ import 'supabase_service.dart';
 class AuthService {
   final fb_auth.FirebaseAuth _firebaseAuth;
   final SupabaseService _dbService;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb
+        ? '951546987988-o9u04i34h76mm86ef6scmag4m75f1kj2.apps.googleusercontent.com'
+        : null,
+    serverClientId:
+        '951546987988-o9u04i34h76mm86ef6scmag4m75f1kj2.apps.googleusercontent.com',
+    scopes: const ['email', 'profile'],
+  );
 
   AuthService({
     fb_auth.FirebaseAuth? firebaseAuth,
@@ -157,17 +164,8 @@ class AuthService {
       }
       return userModel;
     } catch (e) {
-      debugPrint('AuthService.signInWithGoogle fallback: $e');
-      return UserModel(
-        id: 'user_naveen',
-        name: 'Naveen',
-        email: 'naveen@example.com',
-        phone: '+91 98200 12345',
-        role: 'customer',
-        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
-        location: 'Bandra West, Mumbai',
-        createdAt: DateTime.now(),
-      );
+      debugPrint('AuthService.signInWithGoogle error: $e');
+      rethrow;
     }
   }
 

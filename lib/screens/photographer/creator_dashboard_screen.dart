@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routing/app_routes.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/supabase_service.dart';
 
 class CreatorDashboardScreen extends ConsumerWidget {
   const CreatorDashboardScreen({super.key});

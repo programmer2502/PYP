@@ -11,120 +11,131 @@ class RoleSelectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              // Brand Tag
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      // Brand Tag
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Welcome to PYP',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'Welcome to PYP',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                        fontFamily: 'Inter',
+                      const SizedBox(height: 14),
+                      const Text(
+                        'How would you like to continue?',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimaryLight,
+                          fontFamily: 'Outfit',
+                          height: 1.2,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'How would you like to continue?',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimaryLight,
-                  fontFamily: 'Outfit',
-                  height: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Select your account type to personalize your experience.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                  fontFamily: 'Inter',
-                ),
-              ),
-              const SizedBox(height: 32),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Select your account type to personalize your experience.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      const SizedBox(height: 24),
 
-              // 1. Photographer Card
-              _RoleCard(
-                icon: Icons.camera_alt_rounded,
-                title: 'I am a Photographer',
-                badge: 'For Creators',
-                description:
-                    'Showcase your portfolio, receive client bookings, and get paid safely via escrow protection.',
-                bulletPoints: const [
-                  'Creator studio & analytics',
-                  'Client booking management',
-                  'Instant escrow payouts',
-                ],
-                onTap: () {
-                  context.push('${AppRoutes.login}?role=photographer');
-                },
-              ),
+                      // 1. Photographer Card
+                      _RoleCard(
+                        icon: Icons.camera_alt_rounded,
+                        title: 'I am a Photographer',
+                        badge: 'For Creators',
+                        description:
+                            'Showcase your portfolio, receive client bookings, and get paid safely via escrow protection.',
+                        bulletPoints: const [
+                          'Creator studio & analytics',
+                          'Client booking management',
+                          'Instant escrow payouts',
+                        ],
+                        onTap: () {
+                          context.push('${AppRoutes.login}?role=photographer');
+                        },
+                      ),
 
-              const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
-              // 2. Client / User Card
-              _RoleCard(
-                icon: Icons.person_rounded,
-                title: 'I am a Client',
-                badge: 'For Users',
-                description:
-                    'Discover, compare, and book verified photographers and cinematographers for your shoots.',
-                bulletPoints: const [
-                  'Browse verified portfolios',
-                  'Secure escrow checkout',
-                  'High-res deliverables download',
-                ],
-                onTap: () {
-                  context.push('${AppRoutes.login}?role=customer');
-                },
-              ),
+                      // 2. Client / User Card
+                      _RoleCard(
+                        icon: Icons.person_rounded,
+                        title: 'I am a Client',
+                        badge: 'For Users',
+                        description:
+                            'Discover, compare, and book verified photographers and cinematographers for your shoots.',
+                        bulletPoints: const [
+                          'Browse verified portfolios',
+                          'Secure escrow checkout',
+                          'High-res deliverables download',
+                        ],
+                        onTap: () {
+                          context.push('${AppRoutes.login}?role=customer');
+                        },
+                      ),
 
-              const Spacer(),
+                      const SizedBox(height: 16),
+                      const Spacer(),
 
-              // Quick Explore Button
-              Center(
-                child: TextButton(
-                  onPressed: () => context.go(AppRoutes.home),
-                  child: Text(
-                    'Skip for now & Explore as Guest →',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
-                    ),
+                      // Quick Explore Button
+                      Center(
+                        child: TextButton(
+                          onPressed: () => context.go(AppRoutes.home),
+                          child: Text(
+                            'Skip for now & Explore as Guest →',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

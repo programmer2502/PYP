@@ -57,22 +57,22 @@ class UserModel {
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    final map = <String, dynamic>{
       'id': id,
       'name': name,
       'email': email,
       'phone': phone,
       'role': role,
-      'avatar_url': avatarUrl,
-      'location': location,
-      'latitude': latitude,
-      'longitude': longitude,
-      'geohash': geohash,
-      'bio': bio,
-      'fcm_token': fcmToken,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
     };
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
+      map['avatar_url'] = avatarUrl;
+    }
+    if (location != null && location!.isNotEmpty) {
+      map['location'] = location;
+    }
+    return map;
   }
 
   UserModel copyWith({

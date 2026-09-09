@@ -1,7 +1,6 @@
 import 'dart:math';
 import '../models/photographer_model.dart';
 import '../models/filter_model.dart';
-import '../models/booking_model.dart';
 import 'supabase_service.dart';
 
 /// Represents a matched photographer along with their computed match score & insights.

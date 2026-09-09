@@ -11,7 +11,6 @@ import '../../core/widgets/rating_bar_widget.dart';
 import '../../models/booking_model.dart';
 import '../../models/review_model.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/photographer_provider.dart';
 import '../../services/storage_service.dart';
 import '../../services/supabase_service.dart';
 

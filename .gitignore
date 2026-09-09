@@ -33,6 +33,8 @@ migrate_working_dir/
 SKILLS/
 *.apk
 PYP-PickYourPhotographer.apk
+scratch/
+android/build/
 
 # Android related
 **/android/**/gradle-wrapper.jar

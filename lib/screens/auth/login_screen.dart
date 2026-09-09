@@ -68,14 +68,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
-      await authService.signInWithGoogle();
-      if (mounted) {
+      final user = await authService.signInWithGoogle();
+      if (user != null && mounted) {
         context.go('/home');
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '');
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '');
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
