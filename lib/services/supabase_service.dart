@@ -180,7 +180,7 @@ class SupabaseService {
   // --------------------------------------------------------------------------
   Future<void> createBooking(BookingModel booking) async {
     try {
-      await _client.from('bookings').insert(booking.toMap());
+      await _client.from('bookings').insert(booking.toDatabaseMap());
     } catch (e) {
       debugPrint('SupabaseService.createBooking error: $e');
       rethrow;
@@ -205,22 +205,39 @@ class SupabaseService {
     }
   }
 
-  Stream<List<BookingModel>> streamUserBookings(String userId) {
+  /// Resilient Stream of user bookings with instant initial fetch and Realtime updates
+  Stream<List<BookingModel>> streamUserBookings(String userId) async* {
+    final validId = AuthService.toValidUuid(userId);
+
+    // 1. Emit instant initial data via PostgREST REST
     try {
-      final validId = AuthService.toValidUuid(userId);
-      return _client
+      final initialData = await getUserBookings(validId);
+      yield initialData;
+    } catch (e) {
+      debugPrint('streamUserBookings initial fetch notice: $e');
+    }
+
+    // 2. Listen to Realtime CDC stream with graceful error recovery
+    try {
+      final realtimeStream = _client
           .from('bookings')
           .stream(primaryKey: ['id'])
           .eq('customer_id', validId)
           .map((list) => list.map((data) => BookingModel.fromMap(data)).toList());
-    } catch (_) {
-      return Stream.value([]);
+
+      await for (final update in realtimeStream.handleError((err) {
+        debugPrint('streamUserBookings realtime notice: $err');
+      })) {
+        yield update;
+      }
+    } catch (e) {
+      debugPrint('streamUserBookings realtime setup notice: $e');
     }
   }
 
   Future<BookingModel> createBookingWithTransaction(BookingModel booking) async {
     try {
-      await _client.from('bookings').insert(booking.toMap());
+      await _client.from('bookings').insert(booking.toDatabaseMap());
       return booking;
     } catch (e) {
       debugPrint('SupabaseService.createBookingWithTransaction error: $e');
@@ -329,17 +346,38 @@ class SupabaseService {
   // --------------------------------------------------------------------------
   // REALTIME CHAT MESSAGES
   // --------------------------------------------------------------------------
-  Stream<List<ChatMessageModel>> streamMessages(String bookingId) {
+  Stream<List<ChatMessageModel>> streamMessages(String bookingId) async* {
+    final validId = AuthService.toValidUuid(bookingId);
+
+    // 1. Initial REST fetch
     try {
-      final validId = AuthService.toValidUuid(bookingId);
-      return _client
+      final response = await _client
+          .from('messages')
+          .select()
+          .eq('booking_id', validId)
+          .order('created_at', ascending: true);
+      final initial = (response as List).map((d) => ChatMessageModel.fromMap(d)).toList();
+      yield initial;
+    } catch (e) {
+      debugPrint('streamMessages initial fetch notice: $e');
+    }
+
+    // 2. Realtime Stream
+    try {
+      final realtimeStream = _client
           .from('messages')
           .stream(primaryKey: ['id'])
           .eq('booking_id', validId)
           .order('created_at', ascending: true)
           .map((list) => list.map((data) => ChatMessageModel.fromMap(data)).toList());
-    } catch (_) {
-      return Stream.value([]);
+
+      await for (final update in realtimeStream.handleError((err) {
+        debugPrint('streamMessages realtime notice: $err');
+      })) {
+        yield update;
+      }
+    } catch (e) {
+      debugPrint('streamMessages realtime setup notice: $e');
     }
   }
 
@@ -349,11 +387,11 @@ class SupabaseService {
   }) async {
     try {
       final validId = AuthService.toValidUuid(bookingId);
-      await _client.from('messages').insert(message.toMap());
+      await _client.from('messages').insert(message.toDatabaseMap());
       await _client.from('bookings').update({
         'last_message': message.text.isNotEmpty ? message.text : '[Attachment]',
         'last_message_time': message.createdAt.toIso8601String(),
-        'last_sender_id': message.senderId,
+        'last_sender_id': AuthService.toValidUuid(message.senderId),
       }).eq('id', validId);
     } catch (e) {
       debugPrint('SupabaseService.sendChatMessage error: $e');

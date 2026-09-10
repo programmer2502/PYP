@@ -1,4 +1,5 @@
 import '../core/constants/app_constants.dart';
+import '../services/auth_service.dart';
 
 class BookingModel {
   final String id;
@@ -150,4 +151,42 @@ class BookingModel {
       'updated_at': updatedAt?.toIso8601String(),
     };
   }
+
+  /// Map containing only the exact columns in public.bookings table in PostgreSQL
+  Map<String, dynamic> toDatabaseMap() {
+    final validPackageId = (packageId.isNotEmpty && packageId != 'custom')
+        ? AuthService.toValidUuid(packageId)
+        : null;
+
+    final map = <String, dynamic>{
+      'id': AuthService.toValidUuid(id.isNotEmpty ? id : DateTime.now().millisecondsSinceEpoch.toString()),
+      'booking_number': id.isNotEmpty ? id : 'BK-${DateTime.now().millisecondsSinceEpoch}',
+      'customer_id': AuthService.toValidUuid(customerId),
+      'photographer_id': AuthService.toValidUuid(photographerId),
+      'shoot_date': eventDate.toIso8601String(),
+      'time_slot': timeSlot,
+      'duration_hours': 2,
+      'venue': locationAddress,
+      'latitude': latitude,
+      'longitude': longitude,
+      'notes': customNotes,
+      'subtotal': basePrice,
+      'platform_fee': platformFee,
+      'tax': taxAmount,
+      'total_amount': totalAmount,
+      'status': status,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': (updatedAt ?? DateTime.now()).toIso8601String(),
+    };
+
+    if (validPackageId != null) {
+      map['package_id'] = validPackageId;
+    }
+    if (paymentId != null && paymentId!.isNotEmpty) {
+      map['razorpay_payment_id'] = paymentId;
+    }
+
+    return map;
+  }
 }
+

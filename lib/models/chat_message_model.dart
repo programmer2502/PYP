@@ -1,3 +1,5 @@
+import '../services/auth_service.dart';
+
 class ChatMessageModel {
   final String id;
   final String bookingId;
@@ -57,4 +59,20 @@ class ChatMessageModel {
       'created_at': createdAt.toIso8601String(),
     };
   }
+
+  Map<String, dynamic> toDatabaseMap() {
+    return {
+      'booking_id': AuthService.toValidUuid(bookingId),
+      'sender_id': AuthService.toValidUuid(senderId),
+      'sender_name': senderName,
+      'sender_avatar': senderAvatar,
+      'text': text,
+      'media_url': mediaUrl,
+      'media_type': mediaType,
+      'metadata': metadata,
+      'is_read': isRead,
+      'created_at': createdAt.toIso8601String(),
+    };
+  }
 }
+

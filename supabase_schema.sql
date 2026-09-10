@@ -194,6 +194,21 @@ DROP POLICY IF EXISTS "Public insert deliverables" ON public.deliverables;
 CREATE POLICY "Public insert deliverables" ON public.deliverables FOR INSERT WITH CHECK (true);
 
 -- ==============================================================================
+-- REALTIME REPLICATION (For Live Chats, Bookings, & Notifications)
+-- ==============================================================================
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.bookings;
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.users;
+    END IF;
+EXCEPTION
+    WHEN duplicate_object THEN
+        RAISE NOTICE 'Table already in publication';
+END $$;
+
+-- ==============================================================================
 -- SEED DATA (Top Professional Creators, Packages, Reviews, & Demo Bookings)
 -- ==============================================================================
 

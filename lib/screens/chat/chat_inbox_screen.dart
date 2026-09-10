@@ -5,7 +5,6 @@ import '../../core/constants/app_colors.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/avatar_view.dart';
 import '../../core/widgets/empty_state_view.dart';
-import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
 import '../../models/booking_model.dart';
 import '../../providers/booking_provider.dart';
@@ -33,32 +32,80 @@ class ChatInboxScreen extends ConsumerWidget {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: bookingsAsync.when(
-          data: (bookings) {
-            if (bookings.isEmpty) {
-              return EmptyStateView(
-                icon: Icons.chat_bubble_outline_rounded,
-                title: 'No Conversations',
-                message: 'When you book a creator, your dedicated chat channel will appear here.',
-                actionText: 'Find Creators',
-                onAction: () => context.go('/home'),
-              );
-            }
-
-            return ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              itemCount: bookings.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final booking = bookings[index];
-                return _buildConversationTile(context, booking);
-              },
-            );
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () async {
+            ref.invalidate(customerBookingsStreamProvider);
           },
-          loading: () => const Center(
-            child: LoadingIndicator(message: 'Loading conversations...'),
+          child: bookingsAsync.when(
+            data: (bookings) {
+              if (bookings.isEmpty) {
+                return ListView(
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                    EmptyStateView(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      title: 'No Conversations',
+                      message: 'When you book a creator, your dedicated chat channel will appear here.',
+                      actionText: 'Find Creators',
+                      onAction: () => context.go('/home'),
+                    ),
+                  ],
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                itemCount: bookings.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final booking = bookings[index];
+                  return _buildConversationTile(context, booking);
+                },
+              );
+            },
+            loading: () => const Center(
+              child: LoadingIndicator(message: 'Loading conversations...'),
+            ),
+            error: (e, _) => ListView(
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.sync_problem_rounded, size: 48, color: AppColors.textSecondaryLight),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Live updates unavailable',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimaryLight),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Pull down to refresh or check your connection.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          onPressed: () => ref.invalidate(customerBookingsStreamProvider),
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text('Refresh'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          error: (e, _) => ErrorView(message: e.toString()),
         ),
       ),
     );

@@ -19,41 +19,97 @@ class ConversationService {
         _notificationService = notificationService ?? NotificationService();
 
   /// Realtime Stream of Messages for a specific Booking Conversation via Supabase Realtime CDC
-  Stream<List<ChatMessageModel>> streamMessages(String bookingId) {
+  Stream<List<ChatMessageModel>> streamMessages(String bookingId) async* {
+    final validBookingId = AuthService.toValidUuid(bookingId);
+
+    // 1. Initial REST fetch
     try {
-      final validBookingId = AuthService.toValidUuid(bookingId);
-      return _client
+      final res = await _client
+          .from('messages')
+          .select()
+          .eq('booking_id', validBookingId)
+          .order('created_at', ascending: true);
+      final initial = (res as List).map((d) => ChatMessageModel.fromMap(d)).toList();
+      yield initial;
+    } catch (e) {
+      debugPrint('ConversationService.streamMessages initial fetch notice: $e');
+    }
+
+    // 2. Realtime Stream
+    try {
+      final realtimeStream = _client
           .from('messages')
           .stream(primaryKey: ['id'])
           .eq('booking_id', validBookingId)
           .order('created_at', ascending: true)
           .map((list) => list.map((data) => ChatMessageModel.fromMap(data)).toList());
+
+      await for (final update in realtimeStream.handleError((err) {
+        debugPrint('ConversationService.streamMessages realtime notice: $err');
+      })) {
+        yield update;
+      }
     } catch (e) {
-      debugPrint('ConversationService.streamMessages error: $e');
-      return Stream.value([]);
+      debugPrint('ConversationService.streamMessages realtime setup notice: $e');
     }
   }
 
   /// Realtime Stream of Conversation List (Inbox) with Booking Context & User Data
-  Stream<List<ConversationModel>> streamUserConversations(String userId) {
+  Stream<List<ConversationModel>> streamUserConversations(String userId) async* {
+    final validUserId = AuthService.toValidUuid(userId);
+
+    // 1. Initial REST fetch
     try {
-      final validUserId = AuthService.toValidUuid(userId);
-      return _client
+      final res = await _client
+          .from('bookings')
+          .select()
+          .eq('customer_id', validUserId)
+          .order('shoot_date', ascending: false);
+      final initial = (res as List).map((d) => ConversationModel.fromMap(d)).toList();
+      yield initial;
+    } catch (e) {
+      debugPrint('ConversationService.streamUserConversations initial fetch notice: $e');
+    }
+
+    // 2. Realtime Stream
+    try {
+      final realtimeStream = _client
           .from('bookings')
           .stream(primaryKey: ['id'])
           .eq('customer_id', validUserId)
           .map((list) => list.map((data) => ConversationModel.fromMap(data)).toList());
+
+      await for (final update in realtimeStream.handleError((err) {
+        debugPrint('ConversationService.streamUserConversations realtime notice: $err');
+      })) {
+        yield update;
+      }
     } catch (e) {
-      debugPrint('ConversationService.streamUserConversations error: $e');
-      return Stream.value([]);
+      debugPrint('ConversationService.streamUserConversations realtime setup notice: $e');
     }
   }
 
   /// Realtime Stream of Single Conversation & Booking Context
-  Stream<ConversationModel?> streamConversationContext(String bookingId) {
+  Stream<ConversationModel?> streamConversationContext(String bookingId) async* {
+    final validBookingId = AuthService.toValidUuid(bookingId);
+
+    // 1. Initial REST fetch
     try {
-      final validBookingId = AuthService.toValidUuid(bookingId);
-      return _client
+      final res = await _client
+          .from('bookings')
+          .select()
+          .eq('id', validBookingId)
+          .maybeSingle();
+      if (res != null) {
+        yield ConversationModel.fromMap(res);
+      }
+    } catch (e) {
+      debugPrint('ConversationService.streamConversationContext initial fetch notice: $e');
+    }
+
+    // 2. Realtime Stream
+    try {
+      final realtimeStream = _client
           .from('bookings')
           .stream(primaryKey: ['id'])
           .eq('id', validBookingId)
@@ -61,9 +117,14 @@ class ConversationService {
         if (list.isEmpty) return null;
         return ConversationModel.fromMap(list.first);
       });
+
+      await for (final update in realtimeStream.handleError((err) {
+        debugPrint('ConversationService.streamConversationContext realtime notice: $err');
+      })) {
+        yield update;
+      }
     } catch (e) {
-      debugPrint('ConversationService.streamConversationContext error: $e');
-      return Stream.value(null);
+      debugPrint('ConversationService.streamConversationContext realtime setup notice: $e');
     }
   }
 
@@ -77,13 +138,13 @@ class ConversationService {
     try {
       final validBookingId = AuthService.toValidUuid(bookingId);
       // 1. Insert Message to Supabase PostgreSQL
-      await _client.from('messages').insert(message.toMap());
+      await _client.from('messages').insert(message.toDatabaseMap());
 
       // 2. Update Booking Conversation Metadata
       await _client.from('bookings').update({
         'last_message': message.text.isNotEmpty ? message.text : '[Attachment]',
         'last_message_time': message.createdAt.toIso8601String(),
-        'last_sender_id': message.senderId,
+        'last_sender_id': AuthService.toValidUuid(message.senderId),
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('id', validBookingId);
 

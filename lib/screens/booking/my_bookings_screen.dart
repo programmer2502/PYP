@@ -6,7 +6,6 @@ import '../../core/utils/currency_formatter.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/avatar_view.dart';
 import '../../core/widgets/empty_state_view.dart';
-import '../../core/widgets/error_view.dart';
 import '../../core/widgets/loading_indicator.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../models/booking_model.dart';
@@ -70,27 +69,65 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen>
         ),
       ),
       body: SafeArea(
-        child: bookingsAsync.when(
-          data: (bookings) {
-            final upcoming = bookings.where((b) => b.isUpcoming).toList();
-            final inProgress = bookings.where((b) => b.isInProgress).toList();
-            final completed = bookings.where((b) => b.isCompleted).toList();
-            final cancelled = bookings.where((b) => b.isCancelled).toList();
-
-            return TabBarView(
-              controller: _tabController,
-              children: [
-                _buildBookingList(upcoming, 'No Upcoming Sessions', 'Book a top photographer for your upcoming events!'),
-                _buildBookingList(inProgress, 'No Active Sessions', 'Your in-progress shoots & editing files will appear here.'),
-                _buildBookingList(completed, 'No Past Sessions', 'Completed bookings & downloadable galleries will appear here.'),
-                _buildBookingList(cancelled, 'No Cancelled Sessions', 'Cancelled requests will appear here.'),
-              ],
-            );
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () async {
+            ref.invalidate(customerBookingsStreamProvider);
           },
-          loading: () => const Center(
-            child: LoadingIndicator(message: 'Loading your bookings...'),
+          child: bookingsAsync.when(
+            data: (bookings) {
+              final upcoming = bookings.where((b) => b.isUpcoming).toList();
+              final inProgress = bookings.where((b) => b.isInProgress).toList();
+              final completed = bookings.where((b) => b.isCompleted).toList();
+              final cancelled = bookings.where((b) => b.isCancelled).toList();
+
+              return TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildBookingList(upcoming, 'No Upcoming Sessions', 'Book a top photographer for your upcoming events!'),
+                  _buildBookingList(inProgress, 'No Active Sessions', 'Your in-progress shoots & editing files will appear here.'),
+                  _buildBookingList(completed, 'No Past Sessions', 'Completed bookings & downloadable galleries will appear here.'),
+                  _buildBookingList(cancelled, 'No Cancelled Sessions', 'Cancelled requests will appear here.'),
+                ],
+              );
+            },
+            loading: () => const Center(
+              child: LoadingIndicator(message: 'Loading your bookings...'),
+            ),
+            error: (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.sync_problem_rounded, size: 48, color: AppColors.textSecondaryLight),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Live updates unavailable',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimaryLight),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Pull down to refresh or check your connection.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () => ref.invalidate(customerBookingsStreamProvider),
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Refresh'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-          error: (e, _) => ErrorView(message: e.toString()),
         ),
       ),
     );

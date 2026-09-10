@@ -272,9 +272,19 @@ class AuthService {
     } catch (e) {
       debugPrint('AuthService.signInWithGoogle error: $e');
       final errorStr = e.toString();
-      if (errorStr.contains('ApiException: 10') || errorStr.contains('sign_in_failed')) {
+      if (errorStr.contains('ApiException: 10') || errorStr.contains('sign_in_failed') || errorStr.contains('10:')) {
+        debugPrint(
+          '════════════════════════════════════════════════════════════════════════════\n'
+          '[GOOGLE SIGN-IN SETUP INSTRUCTION]\n'
+          'ApiException 10 (Developer Error) detected.\n'
+          '1. Go to Firebase Console > Project Settings > Android apps (com.pyp.lensmatch)\n'
+          '2. Add SHA-1 Fingerprint: B3:A3:9F:6E:CD:06:9E:C4:C2:4B:BE:C5:5F:31:93:10:24:48:F3:EB\n'
+          '3. Add SHA-256 Fingerprint: 47:65:8B:26:5A:26:5D:5A:DE:22:1B:D5:E8:05:A6:C3:5E:30:7C:2B:D2:A6:AD:E9:45:49:87:AC:D2:3C:B6:37\n'
+          '4. Download the updated google-services.json to android/app/google-services.json\n'
+          '════════════════════════════════════════════════════════════════════════════',
+        );
         throw Exception(
-          'Google Sign-In configuration error: Please register the SHA-1 fingerprint (B3:A3:9F:6E:CD:06:9E:C4:C2:4B:BE:C5:5F:31:93:10:24:48:F3:EB) in your Google Cloud / Firebase Console for package "com.pyp.lensmatch".',
+          'Google Sign-In is temporarily unavailable. Please sign in with email/password or complete the SHA-1 setup in Firebase Console.',
         );
       }
       rethrow;

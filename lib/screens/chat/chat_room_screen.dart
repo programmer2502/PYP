@@ -288,7 +288,28 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 );
               },
               loading: () => const Center(child: LoadingIndicator()),
-              error: (err, _) => Center(child: Text('Error loading chat: $err')),
+              error: (err, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.sync_problem_rounded, color: AppColors.textSecondaryLight, size: 36),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Unable to connect to live chat',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimaryLight),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () => ref.invalidate(realtimeMessagesStreamProvider(widget.bookingId)),
+                        icon: const Icon(Icons.refresh, size: 16),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
 

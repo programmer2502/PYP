@@ -128,10 +128,21 @@ class _PaymentCheckoutScreenState extends ConsumerState<PaymentCheckoutScreen> {
         },
       );
     } catch (e) {
+      debugPrint('Payment checkout submission error: $e');
       if (mounted) {
+        String friendlyError = 'Unable to complete booking reservation. Please try again.';
+        final errString = e.toString();
+        if (errString.contains('PGRST') || errString.contains('PostgrestException')) {
+          friendlyError = 'Database schema sync in progress. Your session was preserved, please retry in a moment.';
+        } else if (errString.contains('SocketException') || errString.contains('Network')) {
+          friendlyError = 'Network connection issue. Please check your internet connection.';
+        } else if (errString.isNotEmpty && !errString.contains('Exception:')) {
+          friendlyError = errString.replaceFirst(RegExp(r'^\[.*?\]\s*'), '');
+        }
+
         setState(() {
           _isProcessing = false;
-          _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '');
+          _errorMessage = friendlyError;
         });
       }
     }
