@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/booking_model.dart';
+import '../services/auth_service.dart';
 import '../services/payment_service.dart';
 import '../services/supabase_service.dart';
 import 'auth_provider.dart';
@@ -24,7 +25,9 @@ final singleBookingProvider =
     FutureProvider.family<BookingModel?, String>((ref, bookingId) async {
   final supabaseService = ref.watch(supabaseServiceProvider);
   final user = ref.watch(userProfileProvider).value;
-  final bookings = await supabaseService.getUserBookings(user?.id ?? 'user_naveen');
+  final validUserId = AuthService.toValidUuid(user?.id ?? 'user_naveen');
+  final bookings = await supabaseService.getUserBookings(validUserId);
+  if (bookings.isEmpty) return null;
   return bookings.firstWhere((b) => b.id == bookingId, orElse: () => bookings.first);
 });
 
@@ -33,7 +36,8 @@ final singleBookingStreamProvider =
     StreamProvider.family<BookingModel?, String>((ref, bookingId) {
   final supabaseService = ref.watch(supabaseServiceProvider);
   final user = ref.watch(userProfileProvider).value;
-  return supabaseService.streamUserBookings(user?.id ?? 'user_naveen').map((list) {
+  final validUserId = AuthService.toValidUuid(user?.id ?? 'user_naveen');
+  return supabaseService.streamUserBookings(validUserId).map((list) {
     if (list.isEmpty) return null;
     return list.firstWhere((b) => b.id == bookingId, orElse: () => list.first);
   });

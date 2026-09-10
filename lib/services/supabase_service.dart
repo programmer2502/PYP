@@ -9,6 +9,7 @@ import '../models/booking_model.dart';
 import '../models/chat_message_model.dart';
 import '../models/review_model.dart';
 import '../models/deliverable_file_model.dart';
+import 'auth_service.dart';
 
 /// Centralized Database Service powered by Supabase (PostgreSQL + Realtime)
 class SupabaseService {
@@ -22,10 +23,11 @@ class SupabaseService {
   // --------------------------------------------------------------------------
   Future<UserModel?> getUserProfile(String userId) async {
     try {
+      final validId = AuthService.toValidUuid(userId);
       final response = await _client
           .from('users')
           .select()
-          .eq('id', userId)
+          .eq('id', validId)
           .maybeSingle();
 
       if (response == null) return null;
@@ -36,21 +38,42 @@ class SupabaseService {
     }
   }
 
+  Future<UserModel?> getUserProfileByEmail(String email) async {
+    try {
+      final response = await _client
+          .from('users')
+          .select()
+          .ilike('email', email.trim())
+          .maybeSingle();
+
+      if (response == null) return null;
+      return UserModel.fromMap(response);
+    } catch (e) {
+      debugPrint('SupabaseService.getUserProfileByEmail error: $e');
+      return null;
+    }
+  }
+
   Future<void> createUserProfile(UserModel user) async {
     try {
-      await _client.from('users').upsert(user.toMap());
+      await _client.from('users').upsert(user.toMap(), onConflict: 'email');
     } catch (e) {
-      debugPrint('SupabaseService.createUserProfile error: $e');
-      rethrow;
+      debugPrint('SupabaseService.createUserProfile error (retrying with id): $e');
+      try {
+        await _client.from('users').upsert(user.toMap(), onConflict: 'id');
+      } catch (e2) {
+        debugPrint('SupabaseService.createUserProfile fallback error: $e2');
+      }
     }
   }
 
   Future<void> updateUserProfile(UserModel user) async {
     try {
+      final validId = AuthService.toValidUuid(user.id);
       await _client
           .from('users')
           .update(user.toMap())
-          .eq('id', user.id);
+          .eq('id', validId);
     } catch (e) {
       debugPrint('SupabaseService.updateUserProfile error: $e');
       rethrow;
@@ -104,15 +127,16 @@ class SupabaseService {
 
   Future<PhotographerModel?> getPhotographerById(String id) async {
     try {
+      final validId = AuthService.toValidUuid(id);
       final response = await _client
           .from('photographers')
           .select()
-          .eq('id', id)
+          .eq('id', validId)
           .maybeSingle();
 
       if (response == null) {
         final seed = _getSeedPhotographers();
-        return seed.firstWhere((p) => p.id == id, orElse: () => seed.first);
+        return seed.firstWhere((p) => p.id == id || p.id == validId, orElse: () => seed.first);
       }
       return PhotographerModel.fromMap(response);
     } catch (e) {
@@ -135,10 +159,11 @@ class SupabaseService {
   // --------------------------------------------------------------------------
   Future<List<PackageModel>> getPackages(String photographerId) async {
     try {
+      final validId = AuthService.toValidUuid(photographerId);
       final response = await _client
           .from('packages')
           .select()
-          .eq('photographer_id', photographerId);
+          .eq('photographer_id', validId);
 
       if ((response as List).isEmpty) {
         return _getDefaultPackages(photographerId);
@@ -164,10 +189,11 @@ class SupabaseService {
 
   Future<List<BookingModel>> getUserBookings(String userId) async {
     try {
+      final validId = AuthService.toValidUuid(userId);
       final response = await _client
           .from('bookings')
           .select()
-          .eq('customer_id', userId)
+          .eq('customer_id', validId)
           .order('shoot_date', ascending: false);
 
       return (response as List)
@@ -181,10 +207,11 @@ class SupabaseService {
 
   Stream<List<BookingModel>> streamUserBookings(String userId) {
     try {
+      final validId = AuthService.toValidUuid(userId);
       return _client
           .from('bookings')
           .stream(primaryKey: ['id'])
-          .eq('customer_id', userId)
+          .eq('customer_id', validId)
           .map((list) => list.map((data) => BookingModel.fromMap(data)).toList());
     } catch (_) {
       return Stream.value([]);
@@ -210,6 +237,7 @@ class SupabaseService {
     String? cancelledBy,
   }) async {
     try {
+      final validId = AuthService.toValidUuid(bookingId);
       final Map<String, dynamic> updates = {
         'status': status,
         'updated_at': DateTime.now().toIso8601String(),
@@ -219,7 +247,7 @@ class SupabaseService {
       if (cancellationReason != null) updates['cancellation_reason'] = cancellationReason;
       if (cancelledBy != null) updates['cancelled_by'] = cancelledBy;
 
-      await _client.from('bookings').update(updates).eq('id', bookingId);
+      await _client.from('bookings').update(updates).eq('id', validId);
     } catch (e) {
       debugPrint('SupabaseService.updateBookingStatus error: $e');
       rethrow;
@@ -228,12 +256,13 @@ class SupabaseService {
 
   Future<List<String>> getBookedSlots(String photographerId, DateTime date) async {
     try {
+      final validId = AuthService.toValidUuid(photographerId);
       final start = DateTime(date.year, date.month, date.day);
       final end = start.add(const Duration(days: 1));
       final response = await _client
           .from('bookings')
           .select('time_slot')
-          .eq('photographer_id', photographerId)
+          .eq('photographer_id', validId)
           .gte('shoot_date', start.toIso8601String())
           .lt('shoot_date', end.toIso8601String());
 
@@ -249,10 +278,11 @@ class SupabaseService {
   // --------------------------------------------------------------------------
   Future<List<ReviewModel>> getReviews(String photographerId) async {
     try {
+      final validId = AuthService.toValidUuid(photographerId);
       final response = await _client
           .from('reviews')
           .select()
-          .eq('photographer_id', photographerId)
+          .eq('photographer_id', validId)
           .order('created_at', ascending: false);
 
       return (response as List)
@@ -280,10 +310,11 @@ class SupabaseService {
   // --------------------------------------------------------------------------
   Future<List<DeliverableFileModel>> getDeliverables(String bookingId) async {
     try {
+      final validId = AuthService.toValidUuid(bookingId);
       final response = await _client
           .from('deliverables')
           .select()
-          .eq('booking_id', bookingId)
+          .eq('booking_id', validId)
           .order('created_at', ascending: false);
 
       return (response as List)
@@ -300,10 +331,11 @@ class SupabaseService {
   // --------------------------------------------------------------------------
   Stream<List<ChatMessageModel>> streamMessages(String bookingId) {
     try {
+      final validId = AuthService.toValidUuid(bookingId);
       return _client
           .from('messages')
           .stream(primaryKey: ['id'])
-          .eq('booking_id', bookingId)
+          .eq('booking_id', validId)
           .order('created_at', ascending: true)
           .map((list) => list.map((data) => ChatMessageModel.fromMap(data)).toList());
     } catch (_) {
@@ -316,12 +348,13 @@ class SupabaseService {
     required ChatMessageModel message,
   }) async {
     try {
+      final validId = AuthService.toValidUuid(bookingId);
       await _client.from('messages').insert(message.toMap());
       await _client.from('bookings').update({
         'last_message': message.text.isNotEmpty ? message.text : '[Attachment]',
         'last_message_time': message.createdAt.toIso8601String(),
         'last_sender_id': message.senderId,
-      }).eq('id', bookingId);
+      }).eq('id', validId);
     } catch (e) {
       debugPrint('SupabaseService.sendChatMessage error: $e');
     }
@@ -329,21 +362,24 @@ class SupabaseService {
 
   Future<void> markMessagesAsRead(String bookingId, String userId) async {
     try {
+      final validBookingId = AuthService.toValidUuid(bookingId);
+      final validUserId = AuthService.toValidUuid(userId);
       await _client
           .from('messages')
           .update({'is_read': true})
-          .eq('booking_id', bookingId)
-          .neq('sender_id', userId);
+          .eq('booking_id', validBookingId)
+          .neq('sender_id', validUserId);
     } catch (_) {}
   }
 
   Future<int> getUnreadMessagesCount(String userId) async {
     try {
+      final validUserId = AuthService.toValidUuid(userId);
       final response = await _client
           .from('messages')
           .select('id')
           .eq('is_read', false)
-          .neq('sender_id', userId);
+          .neq('sender_id', validUserId);
       return (response as List).length;
     } catch (_) {
       return 0;

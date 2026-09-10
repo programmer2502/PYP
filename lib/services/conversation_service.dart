@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat_message_model.dart';
 import '../models/conversation_model.dart';
 import '../core/supabase/supabase_config.dart';
+import 'auth_service.dart';
 import 'notification_service.dart';
 
 /// Conversation API, Supabase Realtime Stream & Notifications Layer
@@ -20,10 +21,11 @@ class ConversationService {
   /// Realtime Stream of Messages for a specific Booking Conversation via Supabase Realtime CDC
   Stream<List<ChatMessageModel>> streamMessages(String bookingId) {
     try {
+      final validBookingId = AuthService.toValidUuid(bookingId);
       return _client
           .from('messages')
           .stream(primaryKey: ['id'])
-          .eq('booking_id', bookingId)
+          .eq('booking_id', validBookingId)
           .order('created_at', ascending: true)
           .map((list) => list.map((data) => ChatMessageModel.fromMap(data)).toList());
     } catch (e) {
@@ -35,10 +37,11 @@ class ConversationService {
   /// Realtime Stream of Conversation List (Inbox) with Booking Context & User Data
   Stream<List<ConversationModel>> streamUserConversations(String userId) {
     try {
+      final validUserId = AuthService.toValidUuid(userId);
       return _client
           .from('bookings')
           .stream(primaryKey: ['id'])
-          .eq('customer_id', userId)
+          .eq('customer_id', validUserId)
           .map((list) => list.map((data) => ConversationModel.fromMap(data)).toList());
     } catch (e) {
       debugPrint('ConversationService.streamUserConversations error: $e');
@@ -49,10 +52,11 @@ class ConversationService {
   /// Realtime Stream of Single Conversation & Booking Context
   Stream<ConversationModel?> streamConversationContext(String bookingId) {
     try {
+      final validBookingId = AuthService.toValidUuid(bookingId);
       return _client
           .from('bookings')
           .stream(primaryKey: ['id'])
-          .eq('id', bookingId)
+          .eq('id', validBookingId)
           .map((list) {
         if (list.isEmpty) return null;
         return ConversationModel.fromMap(list.first);
@@ -71,6 +75,7 @@ class ConversationService {
     String? receiverToken,
   }) async {
     try {
+      final validBookingId = AuthService.toValidUuid(bookingId);
       // 1. Insert Message to Supabase PostgreSQL
       await _client.from('messages').insert(message.toMap());
 
@@ -80,7 +85,7 @@ class ConversationService {
         'last_message_time': message.createdAt.toIso8601String(),
         'last_sender_id': message.senderId,
         'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', bookingId);
+      }).eq('id', validBookingId);
 
       // 3. Trigger Notification Layer for Receiver
       try {
@@ -99,11 +104,13 @@ class ConversationService {
   /// Marks all incoming messages as read in the Supabase Realtime Layer
   Future<void> markAsRead(String bookingId, String currentUserId) async {
     try {
+      final validBookingId = AuthService.toValidUuid(bookingId);
+      final validUserId = AuthService.toValidUuid(currentUserId);
       await _client
           .from('messages')
           .update({'is_read': true})
-          .eq('booking_id', bookingId)
-          .neq('sender_id', currentUserId);
+          .eq('booking_id', validBookingId)
+          .neq('sender_id', validUserId);
     } catch (_) {}
   }
 }

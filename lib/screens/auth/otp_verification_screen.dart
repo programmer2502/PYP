@@ -45,11 +45,12 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
-      await authService.verifyPhoneOtp(
+      final user = await authService.verifyPhoneOtp(
         verificationId: widget.verificationId ?? 'demo_verification',
         smsCode: _otpController.text.trim(),
         phoneNumber: widget.phone,
       );
+      ref.read(userProfileProvider.notifier).setUser(user);
 
       if (mounted) {
         context.go('/home');

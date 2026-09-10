@@ -33,7 +33,7 @@ class CreatorDashboardScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.displayName ?? 'Creator Studio',
+                  user?.name ?? 'Creator Studio',
                   style: const TextStyle(
                     fontFamily: 'Outfit',
                     fontWeight: FontWeight.w700,

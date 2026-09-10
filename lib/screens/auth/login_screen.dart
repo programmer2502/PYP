@@ -40,17 +40,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
-      await authService.signInWithEmail(
+      final user = await authService.signInWithEmail(
         email: _emailController.text,
         password: _passwordController.text,
       );
+      ref.read(userProfileProvider.notifier).setUser(user);
       if (mounted) {
-        context.go('/home');
+        if (user.isPhotographer) {
+          context.go('/creator-dashboard');
+        } else {
+          context.go('/home');
+        }
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '');
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '').replaceFirst('Exception: ', '');
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -69,13 +76,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final authService = ref.read(authServiceProvider);
       final user = await authService.signInWithGoogle();
-      if (user != null && mounted) {
-        context.go('/home');
+      if (user != null) {
+        ref.read(userProfileProvider.notifier).setUser(user);
+        if (mounted) {
+          if (user.isPhotographer) {
+            context.go('/creator-dashboard');
+          } else {
+            context.go('/home');
+          }
+        }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '');
+          _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '').replaceFirst('Exception: ', '');
         });
       }
     } finally {

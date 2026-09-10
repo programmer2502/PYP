@@ -46,7 +46,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
-      await authService.signUpWithEmail(
+      final user = await authService.signUpWithEmail(
         name: _nameController.text,
         email: _emailController.text,
         phone: _phoneController.text,
@@ -54,13 +54,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         role: _selectedRole,
         location: _locationController.text.isNotEmpty ? _locationController.text : null,
       );
+      ref.read(userProfileProvider.notifier).setUser(user);
       if (mounted) {
-        context.go('/home');
+        if (user.isPhotographer) {
+          context.go('/creator-onboarding');
+        } else {
+          context.go('/home');
+        }
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '');
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '').replaceFirst('Exception: ', '');
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {

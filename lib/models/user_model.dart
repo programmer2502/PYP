@@ -57,12 +57,19 @@ class UserModel {
   }
 
   Map<String, dynamic> toMap() {
+    String dbRole = role.toLowerCase().trim();
+    if (dbRole == 'photographer') {
+      dbRole = 'creator';
+    } else if (dbRole != 'customer' && dbRole != 'creator' && dbRole != 'admin') {
+      dbRole = 'customer';
+    }
+
     final map = <String, dynamic>{
       'id': id,
       'name': name,
       'email': email,
       'phone': phone,
-      'role': role,
+      'role': dbRole,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
     };

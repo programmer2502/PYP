@@ -37,7 +37,8 @@ void main() async {
   try {
     await Supabase.initialize(
       url: SupabaseConfig.url,
-      anonKey: SupabaseConfig.anonKey,
+      // ignore: deprecated_member_use
+      anonKey: SupabaseConfig.publishableKey,
     );
 
     // Initialize Local & Push Notifications

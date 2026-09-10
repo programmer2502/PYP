@@ -44,22 +44,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 2000));
     if (!mounted) return;
 
-    final authUser = ref.read(currentUserProvider);
+    final userProfile = ref.read(userProfileProvider).value;
 
-    if (authUser == null) {
+    if (userProfile == null) {
       // Not logged in -> Go to Role Selection
       context.go(AppRoutes.roleSelection);
       return;
     }
 
     try {
-      final userProfile = ref.read(userProfileProvider).value;
-      if (!mounted) return;
-
-      if (userProfile?.role == 'photographer') {
+      if (userProfile.isPhotographer) {
         // Check if creator profile is completed in Supabase
         final supabaseService = ref.read(supabaseServiceProvider);
-        final creator = await supabaseService.getPhotographerById(authUser.uid);
+        final creator = await supabaseService.getPhotographerById(userProfile.id);
 
         if (creator != null && creator.categories.isNotEmpty) {
           context.go(AppRoutes.creatorDashboard);

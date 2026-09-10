@@ -56,8 +56,8 @@ class _CreatorOnboardingScreenState
   void initState() {
     super.initState();
     final user = ref.read(currentUserProvider);
-    if (user?.displayName != null) {
-      _nameController.text = user!.displayName!;
+    if (user?.name != null && user!.name.isNotEmpty) {
+      _nameController.text = user.name;
     }
   }
 
@@ -79,15 +79,15 @@ class _CreatorOnboardingScreenState
 
     try {
       final user = ref.read(currentUserProvider);
-      final userId = user?.uid ?? 'creator_${DateTime.now().millisecondsSinceEpoch}';
+      final userId = user?.id ?? 'creator_${DateTime.now().millisecondsSinceEpoch}';
 
       final photographer = PhotographerModel(
         id: userId,
         userId: userId,
         name: _nameController.text.trim(),
         email: user?.email ?? 'creator@pyp.com',
-        phone: user?.phoneNumber ?? '+91 98200 12345',
-        avatarUrl: user?.photoURL ??
+        phone: user?.phone.isNotEmpty == true ? user!.phone : '+91 98200 12345',
+        avatarUrl: user?.avatarUrl ??
             'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80',
         coverImageUrl:
             'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200&q=80',

@@ -38,6 +38,7 @@ class ProfileScreen extends ConsumerWidget {
     if (confirm == true) {
       final authService = ref.read(authServiceProvider);
       await authService.signOut();
+      ref.read(userProfileProvider.notifier).clearUser();
       if (context.mounted) {
         context.go('/login');
       }

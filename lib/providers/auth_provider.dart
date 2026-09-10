@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/supabase_service.dart';
@@ -15,10 +17,10 @@ final authStateStreamProvider = StreamProvider<fb_auth.User?>((ref) {
   return authService.authStateChanges;
 });
 
-// Current Firebase User provider
-final currentUserProvider = Provider<fb_auth.User?>((ref) {
-  final authService = ref.watch(authServiceProvider);
-  return authService.currentUser;
+// Current Unified UserModel provider
+final currentUserProvider = Provider<UserModel?>((ref) {
+  final userProfileState = ref.watch(userProfileProvider);
+  return userProfileState.value;
 });
 
 // Current UserModel state notifier
@@ -31,23 +33,62 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     _init();
   }
 
-  void _init() {
-    _authService.authStateChanges.listen((user) async {
-      if (user == null) {
-        state = const AsyncValue.data(null);
-      } else {
-        try {
-          final userModel = await _dbService.getUserProfile(user.uid);
+  Future<void> _init() async {
+    // 1. Check if Firebase has an existing authenticated session
+    final fbUser = _authService.currentUser;
+    if (fbUser != null) {
+      try {
+        final validId = AuthService.toValidUuid(fbUser.uid);
+        var userModel = await _dbService.getUserProfile(validId);
+        if (userModel == null && fbUser.email != null) {
+          userModel = await _dbService.getUserProfileByEmail(fbUser.email!);
+        }
+        if (userModel != null) {
           state = AsyncValue.data(userModel);
+          return;
+        }
+      } catch (e) {
+        debugPrint('UserProfileNotifier fb init error: $e');
+      }
+    }
+
+    // 2. Check if Supabase Auth has an existing session
+    try {
+      final supaUser = Supabase.instance.client.auth.currentUser;
+      if (supaUser != null) {
+        final validId = AuthService.toValidUuid(supaUser.id);
+        var userModel = await _dbService.getUserProfile(validId);
+        if (userModel == null && supaUser.email != null) {
+          userModel = await _dbService.getUserProfileByEmail(supaUser.email!);
+        }
+        if (userModel != null) {
+          state = AsyncValue.data(userModel);
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // 3. Listen to Firebase auth changes (sign-in, Google sign-in, token refresh)
+    _authService.authStateChanges.listen((user) async {
+      if (user != null) {
+        try {
+          final validId = AuthService.toValidUuid(user.uid);
+          var userModel = await _dbService.getUserProfile(validId);
+          if (userModel == null && user.email != null) {
+            userModel = await _dbService.getUserProfileByEmail(user.email!);
+          }
+          if (userModel != null) {
+            state = AsyncValue.data(userModel);
+          }
         } catch (e, st) {
           state = AsyncValue.error(e, st);
         }
       }
     });
 
-    // Provide default session profile immediately
+    // 4. Default user profile if nothing is cached
     state = AsyncValue.data(UserModel(
-      id: 'user_naveen',
+      id: AuthService.toValidUuid('user_naveen'),
       name: 'Naveen',
       email: 'naveen@example.com',
       phone: '+91 98200 12345',
@@ -58,13 +99,24 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     ));
   }
 
+  void setUser(UserModel? user) {
+    state = AsyncValue.data(user);
+  }
+
+  void clearUser() {
+    state = const AsyncValue.data(null);
+  }
+
   Future<void> refresh() async {
-    final user = _authService.currentUser;
-    if (user != null) {
+    final current = state.value;
+    if (current != null) {
       state = const AsyncValue.loading();
       try {
-        final userModel = await _dbService.getUserProfile(user.uid);
-        state = AsyncValue.data(userModel);
+        var userModel = await _dbService.getUserProfile(current.id);
+        if (userModel == null && current.email.isNotEmpty) {
+          userModel = await _dbService.getUserProfileByEmail(current.email);
+        }
+        state = AsyncValue.data(userModel ?? current);
       } catch (e, st) {
         state = AsyncValue.error(e, st);
       }

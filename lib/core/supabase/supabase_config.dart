@@ -11,7 +11,8 @@ class SupabaseConfig {
   static const String url = 'https://ovtlrihpmetlxxkyxprx.supabase.co';
 
   /// Publishable / Anon Public Key
-  static const String anonKey = 'sb_publishable_aur4_0JDzHNFDhcDG9_Tvg_7xAIkVue';
+  static const String publishableKey = 'sb_publishable_aur4_0JDzHNFDhcDG9_Tvg_7xAIkVue';
+  static const String anonKey = publishableKey;
 
   /// Supabase Client Instance Singleton Accessor
   static SupabaseClient get client => Supabase.instance.client;

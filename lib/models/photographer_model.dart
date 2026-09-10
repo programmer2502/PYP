@@ -116,7 +116,7 @@ class PhotographerModel {
       'portfolio_images': portfolioImages,
       'created_at': createdAt.toIso8601String(),
     };
-    if (userId != null && userId!.isNotEmpty) map['user_id'] = userId;
+    if (userId.isNotEmpty) map['user_id'] = userId;
     if (avatarUrl != null && avatarUrl!.isNotEmpty) map['avatar_url'] = avatarUrl;
     if (coverImageUrl != null && coverImageUrl!.isNotEmpty) map['cover_url'] = coverImageUrl;
     return map;
