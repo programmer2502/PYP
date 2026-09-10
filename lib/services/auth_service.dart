@@ -349,28 +349,19 @@ class AuthService {
       }
       return userModel;
     } catch (e) {
-      debugPrint('AuthService.verifyPhoneOtp notice: $e');
-      final validId = toValidUuid(phoneNumber ?? 'user_naveen');
-      final fallbackUser = UserModel(
-        id: validId,
-        name: 'Naveen',
-        email: 'naveen@example.com',
-        phone: phoneNumber ?? '+91 98200 12345',
-        role: 'customer',
-        avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
-        location: 'Bandra West, Mumbai',
-        createdAt: DateTime.now(),
-      );
-      await _dbService.createUserProfile(fallbackUser);
-      return fallbackUser;
+      debugPrint('AuthService.verifyPhoneOtp error: $e');
+      throw Exception('Invalid verification code. Please check the OTP and try again.');
     }
   }
 
-  /// Sign Out of Firebase & Google
+  /// Sign Out of Firebase, Google & Supabase
   Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();
       await _googleSignIn.signOut();
+      try {
+        await Supabase.instance.client.auth.signOut();
+      } catch (_) {}
     } catch (e) {
       debugPrint('AuthService.signOut error: $e');
     }

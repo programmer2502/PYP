@@ -45,6 +45,7 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
         }
         if (userModel != null) {
           state = AsyncValue.data(userModel);
+          _listenToAuthChanges();
           return;
         }
       } catch (e) {
@@ -63,12 +64,19 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
         }
         if (userModel != null) {
           state = AsyncValue.data(userModel);
+          _listenToAuthChanges();
           return;
         }
       }
     } catch (_) {}
 
-    // 3. Listen to Firebase auth changes (sign-in, Google sign-in, token refresh)
+    // 3. No active authenticated session -> genuinely logged out
+    state = const AsyncValue.data(null);
+    _listenToAuthChanges();
+  }
+
+  void _listenToAuthChanges() {
+    // Listen to Firebase auth state changes
     _authService.authStateChanges.listen((user) async {
       if (user != null) {
         try {
@@ -83,20 +91,35 @@ class UserProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
         } catch (e, st) {
           state = AsyncValue.error(e, st);
         }
+      } else {
+        // If Supabase is also unauthenticated, clear session
+        final supaUser = Supabase.instance.client.auth.currentUser;
+        if (supaUser == null) {
+          state = const AsyncValue.data(null);
+        }
       }
     });
 
-    // 4. Default user profile if nothing is cached
-    state = AsyncValue.data(UserModel(
-      id: AuthService.toValidUuid('user_naveen'),
-      name: 'Naveen',
-      email: 'naveen@example.com',
-      phone: '+91 98200 12345',
-      role: 'customer',
-      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
-      location: 'Bandra West, Mumbai',
-      createdAt: DateTime.now(),
-    ));
+    // Listen to Supabase auth state changes
+    try {
+      Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+        final supaUser = data.session?.user;
+        if (supaUser != null) {
+          try {
+            final validId = AuthService.toValidUuid(supaUser.id);
+            var userModel = await _dbService.getUserProfile(validId);
+            if (userModel == null && supaUser.email != null) {
+              userModel = await _dbService.getUserProfileByEmail(supaUser.email!);
+            }
+            if (userModel != null) {
+              state = AsyncValue.data(userModel);
+            }
+          } catch (_) {}
+        } else if (_authService.currentUser == null) {
+          state = const AsyncValue.data(null);
+        }
+      });
+    } catch (_) {}
   }
 
   void setUser(UserModel? user) {

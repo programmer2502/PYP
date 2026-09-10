@@ -25,7 +25,8 @@ final singleBookingProvider =
     FutureProvider.family<BookingModel?, String>((ref, bookingId) async {
   final supabaseService = ref.watch(supabaseServiceProvider);
   final user = ref.watch(userProfileProvider).value;
-  final validUserId = AuthService.toValidUuid(user?.id ?? 'user_naveen');
+  if (user == null) return null;
+  final validUserId = AuthService.toValidUuid(user.id);
   final bookings = await supabaseService.getUserBookings(validUserId);
   if (bookings.isEmpty) return null;
   return bookings.firstWhere((b) => b.id == bookingId, orElse: () => bookings.first);
@@ -36,7 +37,8 @@ final singleBookingStreamProvider =
     StreamProvider.family<BookingModel?, String>((ref, bookingId) {
   final supabaseService = ref.watch(supabaseServiceProvider);
   final user = ref.watch(userProfileProvider).value;
-  final validUserId = AuthService.toValidUuid(user?.id ?? 'user_naveen');
+  if (user == null) return Stream.value(null);
+  final validUserId = AuthService.toValidUuid(user.id);
   return supabaseService.streamUserBookings(validUserId).map((list) {
     if (list.isEmpty) return null;
     return list.firstWhere((b) => b.id == bookingId, orElse: () => list.first);

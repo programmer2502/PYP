@@ -41,9 +41,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _handleRouting() async {
-    await Future.delayed(const Duration(milliseconds: 2000));
+    // Minimum branding display duration
+    await Future.delayed(const Duration(milliseconds: 1600));
     if (!mounted) return;
 
+    // Await auth resolution if still loading
+    int attempts = 0;
+    while (mounted && ref.read(userProfileProvider).isLoading && attempts < 25) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      attempts++;
+    }
+
+    if (!mounted) return;
     final userProfile = ref.read(userProfileProvider).value;
 
     if (userProfile == null) {

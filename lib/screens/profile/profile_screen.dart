@@ -40,7 +40,7 @@ class ProfileScreen extends ConsumerWidget {
       await authService.signOut();
       ref.read(userProfileProvider.notifier).clearUser();
       if (context.mounted) {
-        context.go('/login');
+        context.go('/role-selection');
       }
     }
   }
@@ -76,19 +76,53 @@ class ProfileScreen extends ConsumerWidget {
           data: (user) {
             if (user == null) {
               return Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('Not logged in'),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () => context.go('/login'),
-                      child: const Text('Sign In'),
-                    ),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.person_outline_rounded, size: 48, color: AppColors.primary),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Not Signed In',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Sign in to access your bookings, messages, and profile settings.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () => context.go('/role-selection'),
+                        child: const Text('Sign In / Register'),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
+
+            final badgeLabel = user.isPhotographer
+                ? 'Verified Creator'
+                : (user.role == 'admin' ? 'Administrator' : 'Verified Member');
+            final badgeIcon = user.isPhotographer
+                ? Icons.camera_alt_rounded
+                : (user.role == 'admin' ? Icons.admin_panel_settings_rounded : Icons.verified_rounded);
 
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -213,14 +247,14 @@ class ProfileScreen extends ConsumerWidget {
                                         borderRadius: BorderRadius.circular(100),
                                         border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
                                       ),
-                                      child: const Row(
+                                      child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Icon(Icons.auto_awesome_rounded, color: Color(0xFF4ADE80), size: 12),
-                                          SizedBox(width: 5),
+                                          Icon(badgeIcon, color: const Color(0xFF4ADE80), size: 12),
+                                          const SizedBox(width: 5),
                                           Text(
-                                            'PYP Elite VIP Member',
-                                            style: TextStyle(
+                                            badgeLabel,
+                                            style: const TextStyle(
                                               color: Color(0xFF4ADE80),
                                               fontSize: 10,
                                               fontWeight: FontWeight.w800,
