@@ -44,7 +44,7 @@ class AuthService {
 
   fb_auth.User? get currentUser => _firebaseAuth.currentUser;
 
-  /// Sign Up with Email and Password
+  /// Sign Up with Email and Password using Supabase Auth
   Future<UserModel> signUpWithEmail({
     required String name,
     required String email,
@@ -55,41 +55,55 @@ class AuthService {
     double? latitude,
     double? longitude,
   }) async {
-    String? uid;
-    String? displayName;
+    final cleanEmail = email.trim();
+    final cleanName = name.trim();
+    final cleanPhone = phone.trim();
 
-    // 1. Try Firebase Auth
+    // 1. Supabase Auth signup (Generates real auth.users UUID)
+    AuthResponse res;
+    try {
+      res = await Supabase.instance.client.auth.signUp(
+        email: cleanEmail,
+        password: password,
+        data: {
+          'name': cleanName,
+          'phone': cleanPhone,
+          'role': role,
+        },
+      );
+    } on AuthException catch (e) {
+      debugPrint('AuthService.signUpWithEmail Supabase error: ${e.message}');
+      if (e.message.toLowerCase().contains('already registered') || e.message.toLowerCase().contains('user already exists')) {
+        throw Exception('An account with this email already exists. Please sign in.');
+      }
+      throw Exception(e.message);
+    } catch (e) {
+      debugPrint('AuthService.signUpWithEmail error: $e');
+      throw Exception('Sign up failed: ${e.toString().replaceAll("Exception: ", "")}');
+    }
+
+    if (res.user == null) {
+      throw Exception('Signup failed: No user returned from authentication server.');
+    }
+
+    final String userId = res.user!.id; // Guaranteed real Supabase Auth UUID
+
+    // Also sync to Firebase Auth if active
     try {
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email.trim(),
+        email: cleanEmail,
         password: password,
       );
-      final fbUser = userCredential.user;
-      uid = fbUser?.uid;
-      displayName = name.trim();
-      await fbUser?.updateDisplayName(displayName);
+      await userCredential.user?.updateDisplayName(cleanName);
     } catch (e) {
-      debugPrint('AuthService.signUpWithEmail (Firebase notice): $e');
+      debugPrint('Firebase signup sync notice: $e');
     }
-
-    // 2. Try Supabase Auth
-    try {
-      final res = await Supabase.instance.client.auth.signUp(
-        email: email.trim(),
-        password: password,
-      );
-      uid ??= res.user?.id;
-    } catch (e) {
-      debugPrint('AuthService.signUpWithEmail (Supabase Auth notice): $e');
-    }
-
-    final validId = toValidUuid(uid ?? email.trim());
 
     final userModel = UserModel(
-      id: validId,
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
+      id: userId,
+      name: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
       role: role,
       location: location ?? 'Bandra West, Mumbai',
       latitude: latitude ?? 19.0596,
@@ -97,67 +111,79 @@ class AuthService {
       createdAt: DateTime.now(),
     );
 
-    // Save User Profile in Supabase PostgreSQL database
+    // Save User Profile in Supabase PostgreSQL database using the real Auth UUID
     await _dbService.createUserProfile(userModel);
     return userModel;
   }
 
-  /// Sign In with Email and Password
+  /// Sign In with Email and Password using Supabase Auth
   Future<UserModel> signInWithEmail({
     required String email,
     required String password,
   }) async {
-    String? uid;
+    final cleanEmail = email.trim();
+    String? userId;
     String? displayName;
     String? photoUrl;
-    bool authSuccess = false;
 
-    // 1. Try Firebase Auth
+    // 1. Authenticate with Supabase Auth
+    try {
+      final res = await Supabase.instance.client.auth.signInWithPassword(
+        email: cleanEmail,
+        password: password,
+      );
+      if (res.user != null) {
+        userId = res.user!.id;
+        displayName = res.user!.userMetadata?['name'];
+      }
+    } on AuthException catch (e) {
+      debugPrint('AuthService.signInWithEmail Supabase Auth error: ${e.message}');
+      if (e.message.toLowerCase().contains('invalid login credentials') ||
+          e.message.toLowerCase().contains('invalid grant')) {
+        throw Exception('Invalid email or password.');
+      }
+      if (e.message.toLowerCase().contains('email not confirmed')) {
+        throw Exception('Please confirm your email address or check your inbox.');
+      }
+      throw Exception(e.message);
+    } catch (e) {
+      debugPrint('AuthService.signInWithEmail Supabase notice: $e');
+    }
+
+    // 2. Also try Firebase Auth in background
     try {
       final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email.trim(),
+        email: cleanEmail,
         password: password,
       );
       final fbUser = userCredential.user;
-      uid = fbUser?.uid;
-      displayName = fbUser?.displayName;
-      photoUrl = fbUser?.photoURL;
-      authSuccess = true;
+      userId ??= fbUser?.uid != null ? toValidUuid(fbUser!.uid) : null;
+      displayName ??= fbUser?.displayName;
+      photoUrl ??= fbUser?.photoURL;
     } catch (e) {
-      debugPrint('AuthService.signInWithEmail (Firebase notice): $e');
+      debugPrint('AuthService.signInWithEmail Firebase notice: $e');
     }
 
-    // 2. Try Supabase Auth
-    if (!authSuccess) {
-      try {
-        final res = await Supabase.instance.client.auth.signInWithPassword(
-          email: email.trim(),
-          password: password,
-        );
-        if (res.user != null) {
-          uid = res.user!.id;
-          authSuccess = true;
-        }
-      } catch (e) {
-        debugPrint('AuthService.signInWithEmail (Supabase Auth notice): $e');
+    if (userId == null) {
+      // Check database directly by email as fallback
+      final existingUser = await _dbService.getUserProfileByEmail(cleanEmail);
+      if (existingUser != null) {
+        return existingUser;
       }
+      throw Exception('Invalid email or password.');
     }
 
-    // 3. Look up profile in database by email or ID
-    UserModel? userModel = await _dbService.getUserProfileByEmail(email.trim());
-    if (userModel == null && uid != null) {
-      userModel = await _dbService.getUserProfile(toValidUuid(uid));
+    // 3. Fetch user profile from PostgreSQL
+    UserModel? userModel = await _dbService.getUserProfile(userId);
+    if (userModel == null) {
+      userModel = await _dbService.getUserProfileByEmail(cleanEmail);
     }
 
     if (userModel == null) {
-      if (!authSuccess) {
-        throw Exception('Invalid email or password. Please verify your credentials or create an account.');
-      }
-      final validId = toValidUuid(uid ?? email.trim());
       userModel = UserModel(
-        id: validId,
-        name: displayName ?? email.split('@').first,
-        email: email.trim(),
+        id: userId,
+        name: displayName ?? cleanEmail.split('@').first,
+        email: cleanEmail,
         phone: '+91 98200 12345',
         role: 'customer',
         avatarUrl: photoUrl ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
@@ -170,36 +196,72 @@ class AuthService {
     return userModel;
   }
 
-  /// Sign In with Google via Firebase Auth & Sync to Supabase DB
+  /// Sign In with Google via Supabase Auth (Native OAuth ID Token)
   Future<UserModel?> signInWithGoogle() async {
     try {
       final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+      if (googleUser == null) return null; // User cancelled
 
       final googleAuth = await googleUser.authentication;
-      final credential = fb_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      final idToken = googleAuth.idToken;
+      final accessToken = googleAuth.accessToken;
 
-      final userCredential = await _firebaseAuth.signInWithCredential(credential);
-      final firebaseUser = userCredential.user;
-      final rawUid = firebaseUser?.uid ?? googleUser.id;
-      final validId = toValidUuid(rawUid);
+      String? userId;
+      String? userEmail = googleUser.email;
+      String? userName = googleUser.displayName;
+      String? userPhoto = googleUser.photoUrl;
 
-      // Fetch or Create Profile in Supabase PostgreSQL using valid UUID
-      var userModel = await _dbService.getUserProfile(validId);
-      if (userModel == null && googleUser.email.isNotEmpty) {
-        userModel = await _dbService.getUserProfileByEmail(googleUser.email);
+      // 1. Authenticate with Supabase Auth using Google ID token
+      if (idToken != null) {
+        try {
+          final res = await Supabase.instance.client.auth.signInWithIdToken(
+            provider: OAuthProvider.google,
+            idToken: idToken,
+            accessToken: accessToken,
+          );
+          if (res.user != null) {
+            userId = res.user!.id;
+            userEmail = res.user!.email ?? userEmail;
+            userName = res.user!.userMetadata?['full_name'] ?? userName;
+            userPhoto = res.user!.userMetadata?['avatar_url'] ?? userPhoto;
+          }
+        } catch (supaErr) {
+          debugPrint('Supabase signInWithIdToken notice: $supaErr');
+        }
+      }
+
+      // 2. Also authenticate with Firebase Auth
+      if (idToken != null || accessToken != null) {
+        try {
+          final credential = fb_auth.GoogleAuthProvider.credential(
+            accessToken: accessToken,
+            idToken: idToken,
+          );
+          final userCredential = await _firebaseAuth.signInWithCredential(credential);
+          final firebaseUser = userCredential.user;
+          userId ??= firebaseUser != null ? toValidUuid(firebaseUser.uid) : null;
+        } catch (fbErr) {
+          debugPrint('Firebase signInWithCredential notice: $fbErr');
+        }
+      }
+
+      userId ??= toValidUuid(googleUser.id);
+
+      final finalEmail = userEmail ?? googleUser.email;
+
+      // 3. Fetch or Create Profile in Supabase PostgreSQL using valid UUID
+      var userModel = await _dbService.getUserProfile(userId);
+      if (userModel == null && finalEmail.isNotEmpty) {
+        userModel = await _dbService.getUserProfileByEmail(finalEmail);
       }
 
       if (userModel == null) {
         userModel = UserModel(
-          id: validId,
-          name: firebaseUser?.displayName ?? googleUser.displayName ?? 'Google User',
-          email: firebaseUser?.email ?? googleUser.email,
-          phone: firebaseUser?.phoneNumber ?? '',
-          avatarUrl: firebaseUser?.photoURL ?? googleUser.photoUrl,
+          id: userId,
+          name: userName ?? 'Google User',
+          email: finalEmail,
+          phone: '',
+          avatarUrl: userPhoto,
           role: 'customer',
           location: 'Bandra West, Mumbai',
           createdAt: DateTime.now(),
@@ -212,7 +274,7 @@ class AuthService {
       final errorStr = e.toString();
       if (errorStr.contains('ApiException: 10') || errorStr.contains('sign_in_failed')) {
         throw Exception(
-          'Google Sign-In setup: Add SHA-1 (B3:A3:9F:6E:CD:06:9E:C4:C2:4B:BE:C5:5F:31:93:10:24:48:F3:EB) to Firebase Console > Project Settings > Your Android App.',
+          'Google Sign-In configuration error: Please register the SHA-1 fingerprint (B3:A3:9F:6E:CD:06:9E:C4:C2:4B:BE:C5:5F:31:93:10:24:48:F3:EB) in your Google Cloud / Firebase Console for package "com.pyp.lensmatch".',
         );
       }
       rethrow;
