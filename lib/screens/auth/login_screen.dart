@@ -9,7 +9,9 @@ import '../../core/widgets/custom_text_field.dart';
 import '../../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  final String? initialRole;
+
+  const LoginScreen({super.key, this.initialRole});
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -19,9 +21,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  late String _selectedRole;
   bool _obscurePassword = true;
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = (widget.initialRole == 'photographer' || widget.initialRole == 'creator')
+        ? 'photographer'
+        : 'customer';
+  }
 
   @override
   void dispose() {
@@ -43,6 +54,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final user = await authService.signInWithEmail(
         email: _emailController.text,
         password: _passwordController.text,
+        requestedRole: _selectedRole,
       );
       ref.read(userProfileProvider.notifier).setUser(user);
       if (mounted) {
@@ -75,7 +87,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
-      final user = await authService.signInWithGoogle();
+      final user = await authService.signInWithGoogle(requestedRole: _selectedRole);
       if (user != null) {
         ref.read(userProfileProvider.notifier).setUser(user);
         if (mounted) {
@@ -103,6 +115,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isPhotographerMode = _selectedRole == 'photographer' || _selectedRole == 'creator';
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
@@ -115,30 +129,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Logo / Icon
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.camera_alt_rounded,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+                        child: const Icon(
+                          Icons.camera_alt_rounded,
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: isPhotographerMode
+                              ? const Color(0xFF10B981).withValues(alpha: 0.12)
+                              : AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isPhotographerMode ? Icons.camera_rounded : Icons.person_rounded,
+                              size: 14,
+                              color: isPhotographerMode ? const Color(0xFF10B981) : AppColors.primary,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              isPhotographerMode ? 'Creator Portal' : 'Client Portal',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: isPhotographerMode ? const Color(0xFF10B981) : AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Welcome back',
-                    style: TextStyle(
+                  const SizedBox(height: 20),
+                  Text(
+                    isPhotographerMode ? 'Welcome, Creator' : 'Welcome back',
+                    style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimaryLight,
@@ -146,14 +193,77 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Sign in to book top creators and manage sessions',
-                    style: TextStyle(
+                  Text(
+                    isPhotographerMode
+                        ? 'Sign in to manage your creator studio, bookings & payouts'
+                        : 'Sign in to book top creators and manage sessions',
+                    style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondaryLight,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
+
+                  // Role Switcher Toggle
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(color: AppColors.cardBorderLight),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selectedRole = 'customer'),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(vertical: 9),
+                              decoration: BoxDecoration(
+                                color: !isPhotographerMode ? AppColors.primary : Colors.transparent,
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Client / User',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: !isPhotographerMode ? Colors.white : AppColors.textSecondaryLight,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selectedRole = 'photographer'),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(vertical: 9),
+                              decoration: BoxDecoration(
+                                color: isPhotographerMode ? AppColors.primary : Colors.transparent,
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Photographer / Studio',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isPhotographerMode ? Colors.white : AppColors.textSecondaryLight,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   if (_errorMessage != null) ...[
                     Container(
@@ -228,7 +338,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   // Sign In Button
                   CustomButton(
-                    text: 'Sign In',
+                    text: isPhotographerMode ? 'Sign In as Creator' : 'Sign In as Client',
                     isLoading: _isLoading,
                     backgroundColor: AppColors.primary,
                     textColor: Colors.white,
@@ -264,7 +374,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: OutlinedButton.icon(
                           onPressed: _isLoading ? null : _handleGoogleSignIn,
                           icon: const FaIcon(FontAwesomeIcons.google, size: 16, color: AppColors.textPrimaryLight),
-                          label: const Text('Google', style: TextStyle(color: AppColors.textPrimaryLight, fontSize: 14, fontWeight: FontWeight.w700)),
+                          label: Text(
+                            isPhotographerMode ? 'Google (Creator)' : 'Google',
+                            style: const TextStyle(color: AppColors.textPrimaryLight, fontSize: 13, fontWeight: FontWeight.w700),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.white,
                             minimumSize: const Size(0, 52),
@@ -301,7 +415,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 14),
                         ),
                         GestureDetector(
-                          onTap: () => context.push('/signup'),
+                          onTap: () => context.push('/signup?role=$_selectedRole'),
                           child: const Text(
                             'Sign Up',
                             style: TextStyle(

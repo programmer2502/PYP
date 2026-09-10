@@ -21,6 +21,21 @@ class SupabaseService {
   // --------------------------------------------------------------------------
   // USER PROFILES
   // --------------------------------------------------------------------------
+  Future<bool> isPhotographerUser(String userId) async {
+    try {
+      final validId = AuthService.toValidUuid(userId);
+      final response = await _client
+          .from('photographers')
+          .select('id')
+          .or('user_id.eq.$validId,id.eq.$validId')
+          .maybeSingle();
+      return response != null;
+    } catch (e) {
+      debugPrint('SupabaseService.isPhotographerUser check notice: $e');
+      return false;
+    }
+  }
+
   Future<UserModel?> getUserProfile(String userId) async {
     try {
       final validId = AuthService.toValidUuid(userId);
@@ -31,7 +46,14 @@ class SupabaseService {
           .maybeSingle();
 
       if (response == null) return null;
-      return UserModel.fromMap(response);
+      var user = UserModel.fromMap(response);
+      if (!user.isPhotographer) {
+        final isPhoto = await isPhotographerUser(user.id);
+        if (isPhoto) {
+          user = user.copyWith(role: 'creator');
+        }
+      }
+      return user;
     } catch (e) {
       debugPrint('SupabaseService.getUserProfile error: $e');
       return null;
@@ -47,7 +69,14 @@ class SupabaseService {
           .maybeSingle();
 
       if (response == null) return null;
-      return UserModel.fromMap(response);
+      var user = UserModel.fromMap(response);
+      if (!user.isPhotographer) {
+        final isPhoto = await isPhotographerUser(user.id);
+        if (isPhoto) {
+          user = user.copyWith(role: 'creator');
+        }
+      }
+      return user;
     } catch (e) {
       debugPrint('SupabaseService.getUserProfileByEmail error: $e');
       return null;

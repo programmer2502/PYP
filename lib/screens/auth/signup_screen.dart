@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/custom_button.dart';
@@ -8,7 +9,9 @@ import '../../core/widgets/custom_text_field.dart';
 import '../../providers/auth_provider.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
-  const SignupScreen({super.key});
+  final String? initialRole;
+
+  const SignupScreen({super.key, this.initialRole});
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -21,10 +24,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _locationController = TextEditingController();
-  String _selectedRole = 'customer';
+  late String _selectedRole;
   bool _obscurePassword = true;
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = (widget.initialRole == 'photographer' || widget.initialRole == 'creator')
+        ? 'photographer'
+        : 'customer';
+  }
 
   @override
   void dispose() {
@@ -60,6 +71,40 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           context.go('/creator-onboarding');
         } else {
           context.go('/home');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceFirst(RegExp(r'^\[.*?\]\s*'), '').replaceFirst('Exception: ', '');
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authService = ref.read(authServiceProvider);
+      final user = await authService.signInWithGoogle(requestedRole: _selectedRole);
+      if (user != null) {
+        ref.read(userProfileProvider.notifier).setUser(user);
+        if (mounted) {
+          if (user.isPhotographer) {
+            context.go('/creator-onboarding');
+          } else {
+            context.go('/home');
+          }
         }
       }
     } catch (e) {
@@ -282,11 +327,51 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
                   // Submit Button
                   CustomButton(
-                    text: 'Create Account',
+                    text: _selectedRole == 'photographer' ? 'Register as Creator' : 'Create Account',
                     isLoading: _isLoading,
                     backgroundColor: AppColors.primary,
                     textColor: Colors.white,
                     onPressed: _handleSignup,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Divider
+                  Row(
+                    children: [
+                      const Expanded(child: Divider(color: AppColors.cardBorderLight)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR SIGN UP WITH',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                            color: AppColors.textMutedLight,
+                          ),
+                        ),
+                      ),
+                      const Expanded(child: Divider(color: AppColors.cardBorderLight)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Google Sign Up Button
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _handleGoogleSignIn,
+                    icon: const FaIcon(FontAwesomeIcons.google, size: 16, color: AppColors.textPrimaryLight),
+                    label: Text(
+                      _selectedRole == 'photographer'
+                          ? 'Sign up with Google (Creator)'
+                          : 'Sign up with Google',
+                      style: const TextStyle(color: AppColors.textPrimaryLight, fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 52),
+                      side: const BorderSide(color: AppColors.cardBorderLight),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                    ),
                   ),
                   const SizedBox(height: 24),
 

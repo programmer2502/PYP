@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/user_model.dart';
+import '../models/photographer_model.dart';
 import 'supabase_service.dart';
 
 /// Robust Hybrid Architecture Auth Service:
@@ -26,6 +27,45 @@ class AuthService {
     SupabaseService? dbService,
   })  : _firebaseAuth = firebaseAuth ?? fb_auth.FirebaseAuth.instance,
         _dbService = dbService ?? SupabaseService();
+
+  /// Helper to ensure a creator record exists in photographers table
+  Future<void> _ensurePhotographerProfile(UserModel user) async {
+    try {
+      final validId = toValidUuid(user.id);
+      final exists = await _dbService.isPhotographerUser(validId);
+      if (!exists) {
+        await _dbService.createPhotographerProfile(PhotographerModel(
+          id: validId,
+          userId: validId,
+          name: user.name.isNotEmpty ? user.name : 'Creator Studio',
+          email: user.email,
+          phone: user.phone.isNotEmpty ? user.phone : '+91 98200 12345',
+          avatarUrl: user.avatarUrl ??
+              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80',
+          coverImageUrl:
+              'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200&q=80',
+          tagline: 'Visual Storyteller & Cinematographer',
+          bio: 'Passionate about crafting cinematic frames and unforgettable visual memories.',
+          location: user.location ?? 'Bandra West, Mumbai',
+          latitude: user.latitude ?? 19.0596,
+          longitude: user.longitude ?? 72.8295,
+          startingPrice: 4999.0,
+          hourlyRate: 1999.0,
+          categories: const ['Portrait', 'Editorial', 'Fashion'],
+          styles: const ['Cinematic', 'Editorial'],
+          equipment: const ['Sony A7 IV', '85mm f/1.4 GM'],
+          portfolioImages: const [
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
+            'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&q=80',
+            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80',
+          ],
+          createdAt: DateTime.now(),
+        ));
+      }
+    } catch (e) {
+      debugPrint('AuthService._ensurePhotographerProfile notice: $e');
+    }
+  }
 
   /// Converts any string (Firebase UID, email, or raw ID) to a guaranteed valid RFC-4122 PostgreSQL UUID
   static String toValidUuid(String raw) {
@@ -58,6 +98,7 @@ class AuthService {
     final cleanEmail = email.trim();
     final cleanName = name.trim();
     final cleanPhone = phone.trim();
+    final targetRole = (role == 'photographer' || role == 'creator') ? 'creator' : 'customer';
 
     // 1. Supabase Auth signup (Generates real auth.users UUID)
     AuthResponse res;
@@ -68,7 +109,7 @@ class AuthService {
         data: {
           'name': cleanName,
           'phone': cleanPhone,
-          'role': role,
+          'role': targetRole,
         },
       );
     } on AuthException catch (e) {
@@ -104,7 +145,7 @@ class AuthService {
       name: cleanName,
       email: cleanEmail,
       phone: cleanPhone,
-      role: role,
+      role: targetRole,
       location: location ?? 'Bandra West, Mumbai',
       latitude: latitude ?? 19.0596,
       longitude: longitude ?? 72.8295,
@@ -113,6 +154,9 @@ class AuthService {
 
     // Save User Profile in Supabase PostgreSQL database using the real Auth UUID
     await _dbService.createUserProfile(userModel);
+    if (userModel.isPhotographer) {
+      await _ensurePhotographerProfile(userModel);
+    }
     return userModel;
   }
 
@@ -120,6 +164,7 @@ class AuthService {
   Future<UserModel> signInWithEmail({
     required String email,
     required String password,
+    String? requestedRole,
   }) async {
     final cleanEmail = email.trim();
     String? userId;
@@ -168,9 +213,10 @@ class AuthService {
       // Check database directly by email as fallback
       final existingUser = await _dbService.getUserProfileByEmail(cleanEmail);
       if (existingUser != null) {
-        return existingUser;
+        userId = existingUser.id;
+      } else {
+        throw Exception('Invalid email or password.');
       }
-      throw Exception('Invalid email or password.');
     }
 
     // 3. Fetch user profile from PostgreSQL
@@ -179,13 +225,16 @@ class AuthService {
       userModel = await _dbService.getUserProfileByEmail(cleanEmail);
     }
 
+    final isExplicitCreator = requestedRole == 'photographer' || requestedRole == 'creator';
+
     if (userModel == null) {
+      final initialRole = isExplicitCreator ? 'creator' : 'customer';
       userModel = UserModel(
         id: userId,
         name: displayName ?? cleanEmail.split('@').first,
         email: cleanEmail,
         phone: '+91 98200 12345',
-        role: 'customer',
+        role: initialRole,
         avatarUrl: photoUrl ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80',
         location: 'Bandra West, Mumbai',
         createdAt: DateTime.now(),
@@ -193,11 +242,21 @@ class AuthService {
       await _dbService.createUserProfile(userModel);
     }
 
+    // If signing in via Photographer portal, upgrade/ensure creator role
+    if (isExplicitCreator && !userModel.isPhotographer) {
+      userModel = userModel.copyWith(role: 'creator');
+      await _dbService.updateUserProfile(userModel);
+    }
+
+    if (userModel.isPhotographer) {
+      await _ensurePhotographerProfile(userModel);
+    }
+
     return userModel;
   }
 
   /// Sign In with Google via Supabase Auth (Native OAuth ID Token)
-  Future<UserModel?> signInWithGoogle() async {
+  Future<UserModel?> signInWithGoogle({String? requestedRole}) async {
     try {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null; // User cancelled
@@ -246,7 +305,6 @@ class AuthService {
       }
 
       userId ??= toValidUuid(googleUser.id);
-
       final finalEmail = userEmail ?? googleUser.email;
 
       // 3. Fetch or Create Profile in Supabase PostgreSQL using valid UUID
@@ -255,19 +313,34 @@ class AuthService {
         userModel = await _dbService.getUserProfileByEmail(finalEmail);
       }
 
+      final isExplicitCreator = requestedRole == 'photographer' || requestedRole == 'creator';
+
       if (userModel == null) {
+        // Dynamic role resolution for NEW Google users based on the entry portal
+        final chosenRole = isExplicitCreator ? 'creator' : 'customer';
         userModel = UserModel(
           id: userId,
           name: userName ?? 'Google User',
           email: finalEmail,
           phone: '',
           avatarUrl: userPhoto,
-          role: 'customer',
+          role: chosenRole,
           location: 'Bandra West, Mumbai',
           createdAt: DateTime.now(),
         );
         await _dbService.createUserProfile(userModel);
+      } else {
+        // Existing user: if user explicitly signed in through the Photographer portal, upgrade to creator
+        if (isExplicitCreator && !userModel.isPhotographer) {
+          userModel = userModel.copyWith(role: 'creator');
+          await _dbService.updateUserProfile(userModel);
+        }
       }
+
+      if (userModel.isPhotographer) {
+        await _ensurePhotographerProfile(userModel);
+      }
+
       return userModel;
     } catch (e) {
       debugPrint('AuthService.signInWithGoogle error: $e');

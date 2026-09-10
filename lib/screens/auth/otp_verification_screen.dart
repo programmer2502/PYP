@@ -53,7 +53,11 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
       ref.read(userProfileProvider.notifier).setUser(user);
 
       if (mounted) {
-        context.go('/home');
+        if (user.isPhotographer) {
+          context.go('/creator-dashboard');
+        } else {
+          context.go('/home');
+        }
       }
     } catch (e) {
       if (mounted) {

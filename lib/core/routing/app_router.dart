@@ -69,11 +69,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) {
+          final role = state.uri.queryParameters['role'];
+          return LoginScreen(initialRole: role);
+        },
       ),
       GoRoute(
         path: AppRoutes.signup,
-        builder: (context, state) => const SignupScreen(),
+        builder: (context, state) {
+          final role = state.uri.queryParameters['role'];
+          return SignupScreen(initialRole: role);
+        },
       ),
       GoRoute(
         path: AppRoutes.phoneAuth,
