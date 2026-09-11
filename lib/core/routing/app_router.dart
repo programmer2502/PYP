@@ -36,6 +36,13 @@ import '../../screens/splash_screen.dart';
 import '../../screens/auth/role_selection_screen.dart';
 import '../../screens/photographer/creator_onboarding_screen.dart';
 import '../../screens/photographer/creator_dashboard_screen.dart';
+import '../../screens/photographer/portfolio_manager_screen.dart';
+import '../../screens/photographer/packages_manager_screen.dart';
+import '../../screens/photographer/creator_booking_detail_screen.dart';
+import '../../screens/photographer/creator_earnings_screen.dart';
+import '../../screens/photographer/payout_settings_screen.dart';
+import '../../screens/photographer/creator_reviews_screen.dart';
+import '../../screens/photographer/creator_notifications_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHome = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
@@ -283,6 +290,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.helpSupport,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const HelpSupportScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creatorPortfolio,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const PortfolioManagerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creatorPackages,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const PackagesManagerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creatorBookingDetail,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['bookingId'] ?? '';
+          return CreatorBookingDetailScreen(bookingId: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.creatorEarnings,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CreatorEarningsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creatorPayoutSettings,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const PayoutSettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creatorReviews,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CreatorReviewsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.creatorNotifications,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const CreatorNotificationsScreen(),
       ),
     ],
   );

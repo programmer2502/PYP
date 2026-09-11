@@ -64,6 +64,10 @@ class BookingModel {
     this.updatedAt,
   });
 
+  DateTime get shootDate => eventDate;
+  String get location => locationAddress;
+  String? get specialRequirements => customNotes;
+
   bool get isUpcoming =>
       status == AppConstants.statusRequested || status == AppConstants.statusConfirmed;
 

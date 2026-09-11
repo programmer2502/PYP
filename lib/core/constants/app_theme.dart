@@ -14,11 +14,11 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         primaryContainer: AppColors.primaryContainer,
-        secondary: AppColors.accentAmber,
+        secondary: AppColors.accentEmerald,
         surface: AppColors.surfaceLight,
         error: AppColors.error,
         onPrimary: Colors.white,
-        onSecondary: Colors.black,
+        onSecondary: Colors.white,
         onSurface: AppColors.textPrimaryLight,
       ),
       appBarTheme: const AppBarTheme(
@@ -48,7 +48,7 @@ class AppTheme {
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textMutedLight,
         type: BottomNavigationBarType.fixed,
-        elevation: 12,
+        elevation: 8,
         selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
       ),

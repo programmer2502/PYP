@@ -176,12 +176,22 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                     ),
                     _buildAttachmentOption(
                       icon: Icons.photo_library_rounded,
-                      label: 'Moodboard',
+                      label: 'Gallery',
                       color: AppColors.badgeSkyIcon,
                       bgColor: AppColors.badgeSkyBg,
                       onTap: () {
                         Navigator.pop(context);
                         _pickAndSendImage(ImageSource.gallery);
+                      },
+                    ),
+                    _buildAttachmentOption(
+                      icon: Icons.request_quote_rounded,
+                      label: 'Quote',
+                      color: const Color(0xFF00A86B),
+                      bgColor: const Color(0xFFE6F7F0),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showSendQuoteDialog();
                       },
                     ),
                     _buildAttachmentOption(
@@ -198,20 +208,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                         );
                       },
                     ),
-                    _buildAttachmentOption(
-                      icon: Icons.schedule_rounded,
-                      label: 'Timeline',
-                      color: AppColors.badgePurpleIcon,
-                      bgColor: AppColors.badgePurpleBg,
-                      onTap: () {
-                        Navigator.pop(context);
-                        _sendMessage(
-                          text: '⏰ Proposed Shoot Timeline: 10:00 AM - 12:00 PM (2 Hours)',
-                          mediaType: 'timeline',
-                          metadata: {'duration': '2 Hours', 'slot': '10:00 AM'},
-                        );
-                      },
-                    ),
                   ],
                 ),
               ],
@@ -219,6 +215,138 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _showSendQuoteDialog() {
+    final titleCtrl = TextEditingController(text: 'Custom Photography Package');
+    final amountCtrl = TextEditingController(text: '7500');
+    final durationCtrl = TextEditingController(text: '3');
+    final deliverablesCtrl = TextEditingController(text: '50 Edited Photos + 2 4K Reels');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00A86B).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.request_quote_rounded, color: Color(0xFF00A86B), size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Send Custom Quote',
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: titleCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Quote Title / Scope',
+                  hintText: 'e.g. Sunset Pre-Wedding Special',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: amountCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Price (₹ INR)',
+                        hintText: '7500',
+                        prefixIcon: Icon(Icons.currency_rupee_rounded),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: durationCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Duration (Hours)',
+                        hintText: '3',
+                        prefixIcon: Icon(Icons.schedule_rounded),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: deliverablesCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Deliverables & Inclusions',
+                  hintText: 'e.g. 50 Edited Photos + 2 4K Reels',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final price = double.tryParse(amountCtrl.text.trim()) ?? 7500.0;
+                    Navigator.pop(ctx);
+                    _sendMessage(
+                      text: '📜 Official Custom Studio Quote: ${titleCtrl.text.trim()} for ₹${price.toInt()}',
+                      mediaType: 'quote',
+                      metadata: {
+                        'title': titleCtrl.text.trim(),
+                        'price': price,
+                        'duration': '${durationCtrl.text.trim()} Hours',
+                        'deliverables': deliverablesCtrl.text.trim(),
+                        'validity': '48 Hours',
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.send_rounded, color: Colors.white),
+                  label: const Text('Send Quote to Client',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00A86B),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -345,7 +473,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   // HEADER
   // --------------------------------------------------------------------------
   PreferredSizeWidget _buildChatHeader(ConversationModel? convo) {
-    final creatorName = convo?.creatorName ?? 'Arjun Mehta';
+    final creatorName = convo?.creatorName.isNotEmpty == true ? convo!.creatorName : 'Creator';
     final isOnline = convo?.isCreatorOnline ?? true;
 
     return AppBar(
@@ -435,9 +563,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   // BOOKING CONTEXT BANNER (Architecture Component)
   // --------------------------------------------------------------------------
   Widget _buildBookingContextBanner(ConversationModel? convo) {
-    final bookingNumber = convo?.bookingNumber ?? '#BK-9021';
-    final service = convo?.serviceName ?? 'Editorial Portrait Standard';
-    final venue = convo?.venue ?? 'Bandra West, Mumbai';
+    final bookingNumber = convo?.bookingNumber.isNotEmpty == true 
+        ? convo!.bookingNumber 
+        : (widget.bookingId.length >= 8 ? '#${widget.bookingId.substring(0, 8).toUpperCase()}' : '#${widget.bookingId}');
+    final service = convo?.serviceName.isNotEmpty == true ? convo!.serviceName : 'Session Booking';
+    final venue = convo?.venue.isNotEmpty == true ? convo!.venue : 'Direct Shoot';
+    final status = convo?.bookingStatus.isNotEmpty == true ? convo!.bookingStatus.toUpperCase() : 'CONFIRMED';
 
     return GestureDetector(
       onTap: () => context.push('/booking-detail/${widget.bookingId}'),
@@ -483,12 +614,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                           color: AppColors.primary,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text('CONFIRMED', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
+                        child: Text(status, style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
                       ),
                     ],
                   ),
                   Text(
-                    '$service • $venue',
+                    venue.isNotEmpty ? '$service • $venue' : service,
                     style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 11, fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -603,16 +734,109 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 ),
               ),
 
-            // Message Text
-            Text(
-              message.text,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: isMe ? Colors.white : AppColors.textPrimaryLight,
-                height: 1.35,
+            // Custom Quote Message Card
+            if (message.mediaType == 'quote' && message.metadata != null) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isMe ? Colors.white.withValues(alpha: 0.15) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isMe ? Colors.white.withValues(alpha: 0.3) : const Color(0xFF00A86B).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            message.metadata!['title'] ?? 'Custom Studio Quote',
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: isMe ? Colors.white : AppColors.textPrimaryLight,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '₹${(message.metadata!['price'] as num?)?.toInt() ?? 0}',
+                          style: TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: isMe ? Colors.white : const Color(0xFF00A86B),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    if (message.metadata!['duration'] != null)
+                      Text(
+                        '⏱ Duration: ${message.metadata!['duration']}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isMe ? Colors.white70 : Colors.grey.shade700,
+                        ),
+                      ),
+                    if (message.metadata!['deliverables'] != null)
+                      Text(
+                        '📦 Inclusions: ${message.metadata!['deliverables']}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isMe ? Colors.white70 : Colors.grey.shade700,
+                        ),
+                      ),
+                    if (!isMe) ...[
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Quote accepted! Proceeding to Escrow Checkout...'),
+                                backgroundColor: Color(0xFF00A86B),
+                              ),
+                            );
+                            context.push('/payment-checkout', extra: {
+                              'bookingId': widget.bookingId,
+                              'amount': message.metadata!['price'],
+                              'packageTitle': message.metadata!['title'],
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00A86B),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text(
+                            'Accept & Book via Escrow',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ),
+            ] else ...[
+              // Normal Message Text
+              Text(
+                message.text,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: isMe ? Colors.white : AppColors.textPrimaryLight,
+                  height: 1.35,
+                ),
+              ),
+            ],
             const SizedBox(height: 4),
 
             // Timestamp and Read Receipts

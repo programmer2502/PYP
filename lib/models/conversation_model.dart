@@ -39,14 +39,14 @@ class ConversationModel {
     required this.creatorName,
     this.creatorAvatar,
     this.isCreatorVerified = true,
-    this.creatorSpecialty = 'Editorial & Wedding',
+    this.creatorSpecialty = '',
     this.isCreatorOnline = true,
     required this.bookingNumber,
     required this.serviceName,
     this.shootDate,
     required this.venue,
     this.bookingStatus = 'confirmed',
-    this.totalAmount = 4999.0,
+    this.totalAmount = 0.0,
     required this.lastMessage,
     required this.lastMessageTime,
     required this.lastSenderId,
@@ -54,8 +54,11 @@ class ConversationModel {
   });
 
   factory ConversationModel.fromMap(Map<String, dynamic> data, {String? id}) {
+    final rawId = id ?? data['id']?.toString() ?? data['booking_number'] ?? '';
+    final rawBookingNumber = data['booking_number'] ?? data['bookingNumber'] ?? (rawId.isNotEmpty ? '#${rawId.substring(0, rawId.length >= 8 ? 8 : rawId.length).toUpperCase()}' : '');
+
     return ConversationModel(
-      id: id ?? data['id']?.toString() ?? data['booking_number'] ?? '',
+      id: rawId,
       bookingId: data['booking_id']?.toString() ?? data['bookingId']?.toString() ?? data['id']?.toString() ?? '',
       customerId: data['customer_id']?.toString() ?? data['customerId']?.toString() ?? '',
       customerName: data['customer_name'] ?? data['customerName'] ?? 'Customer',
@@ -64,14 +67,14 @@ class ConversationModel {
       creatorName: data['photographer_name'] ?? data['creatorName'] ?? 'Creator',
       creatorAvatar: data['photographer_avatar'] ?? data['creatorAvatar'],
       isCreatorVerified: data['is_creator_verified'] ?? data['isCreatorVerified'] ?? true,
-      creatorSpecialty: data['creator_specialty'] ?? data['creatorSpecialty'] ?? 'Editorial & Wedding',
+      creatorSpecialty: data['creator_specialty'] ?? data['creatorSpecialty'] ?? '',
       isCreatorOnline: data['is_creator_online'] ?? data['isCreatorOnline'] ?? true,
-      bookingNumber: data['booking_number'] ?? data['bookingNumber'] ?? '#BK-9021',
-      serviceName: data['service_name'] ?? data['package_title'] ?? data['serviceName'] ?? 'Editorial Portrait Standard',
+      bookingNumber: rawBookingNumber,
+      serviceName: data['service_name'] ?? data['package_title'] ?? data['serviceName'] ?? 'Session Booking',
       shootDate: data['shoot_date'] != null ? DateTime.tryParse(data['shoot_date'].toString()) : null,
-      venue: data['venue'] ?? data['locationAddress'] ?? 'Bandra West, Mumbai',
+      venue: data['venue'] ?? data['location_address'] ?? data['locationAddress'] ?? '',
       bookingStatus: data['status'] ?? data['bookingStatus'] ?? 'confirmed',
-      totalAmount: (data['total_amount'] as num?)?.toDouble() ?? (data['totalAmount'] as num?)?.toDouble() ?? 4999.0,
+      totalAmount: (data['total_amount'] as num?)?.toDouble() ?? (data['totalAmount'] as num?)?.toDouble() ?? 0.0,
       lastMessage: data['last_message'] ?? data['lastMessage'] ?? '',
       lastMessageTime: data['last_message_time'] != null 
           ? DateTime.tryParse(data['last_message_time'].toString()) ?? DateTime.now()

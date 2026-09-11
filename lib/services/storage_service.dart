@@ -30,8 +30,8 @@ class StorageService {
 
       return _client.storage.from('avatars').getPublicUrl(path);
     } catch (e) {
-      debugPrint('StorageService.uploadAvatar fallback: $e');
-      return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&q=80';
+      debugPrint('StorageService.uploadAvatar error: $e');
+      rethrow;
     }
   }
 
@@ -58,9 +58,8 @@ class StorageService {
       onProgress?.call(1.0);
       return _client.storage.from('chat-attachments').getPublicUrl(path);
     } catch (e) {
-      debugPrint('StorageService.uploadChatAttachment fallback: $e');
-      onProgress?.call(1.0);
-      return 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80';
+      debugPrint('StorageService.uploadChatAttachment error: $e');
+      rethrow;
     }
   }
 
@@ -82,8 +81,53 @@ class StorageService {
 
       return _client.storage.from('portfolios').getPublicUrl(path);
     } catch (e) {
-      debugPrint('StorageService.uploadReviewPhoto fallback: $e');
-      return 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80';
+      debugPrint('StorageService.uploadReviewPhoto error: $e');
+      rethrow;
+    }
+  }
+
+  /// Upload portfolio media directly from device (Photo / Video / Reel)
+  Future<String> uploadPortfolioMedia({
+    required String photographerId,
+    required String filePath,
+    Uint8List? fileBytes,
+    String? originalFileName,
+    String? mimeType,
+  }) async {
+    try {
+      final ext = originalFileName != null && originalFileName.contains('.')
+          ? originalFileName.split('.').last
+          : (filePath.contains('.') ? filePath.split('.').last : 'jpg');
+      final fileName = 'portfolio_${_uuid.v4()}.$ext';
+      final path = '$photographerId/$fileName';
+
+      if (kIsWeb && fileBytes != null) {
+        await _client.storage.from('portfolios').uploadBinary(
+          path,
+          fileBytes,
+          fileOptions: FileOptions(
+            cacheControl: '3600',
+            upsert: true,
+            contentType: mimeType,
+          ),
+        );
+      } else {
+        final file = File(filePath);
+        await _client.storage.from('portfolios').upload(
+          path,
+          file,
+          fileOptions: FileOptions(
+            cacheControl: '3600',
+            upsert: true,
+            contentType: mimeType,
+          ),
+        );
+      }
+
+      return _client.storage.from('portfolios').getPublicUrl(path);
+    } catch (e) {
+      debugPrint('StorageService.uploadPortfolioMedia error: $e');
+      rethrow;
     }
   }
 }

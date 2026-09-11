@@ -300,35 +300,7 @@ class ProfileScreen extends ConsumerWidget {
                             onTap: () => context.go('/creator-dashboard'),
                           ),
                           const Divider(color: AppColors.cardBorderLight, height: 1, indent: 64),
-                        ] else ...[
-                          _buildMenuTile(
-                            icon: Icons.storefront_rounded,
-                            title: 'Become a PYP Creator',
-                            badgeBg: AppColors.badgePinkBg,
-                            badgeIcon: AppColors.badgePinkIcon,
-                            onTap: () => context.push('/creator-onboarding'),
-                          ),
-                          const Divider(color: AppColors.cardBorderLight, height: 1, indent: 64),
                         ],
-                        _buildMenuTile(
-                          icon: Icons.swap_horiz_rounded,
-                          title: user.isPhotographer ? 'Switch to Client View' : 'Switch to Creator Mode',
-                          badgeBg: AppColors.badgeSkyBg,
-                          badgeIcon: AppColors.badgeSkyIcon,
-                          onTap: () async {
-                            final newRole = user.isPhotographer ? 'customer' : 'creator';
-                            final updated = user.copyWith(role: newRole);
-                            await ref.read(userProfileProvider.notifier).updateUser(updated);
-                            if (context.mounted) {
-                              if (updated.isPhotographer) {
-                                context.go('/creator-dashboard');
-                              } else {
-                                context.go('/home');
-                              }
-                            }
-                          },
-                        ),
-                        const Divider(color: AppColors.cardBorderLight, height: 1, indent: 64),
                         _buildMenuTile(
                           icon: Icons.favorite_border_rounded,
                           title: 'Saved Photographers',

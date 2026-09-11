@@ -9,6 +9,11 @@ import '../models/booking_model.dart';
 import '../models/chat_message_model.dart';
 import '../models/review_model.dart';
 import '../models/deliverable_file_model.dart';
+import '../models/availability_model.dart';
+import '../models/portfolio_media_model.dart';
+import '../models/earnings_model.dart';
+import '../models/payout_details_model.dart';
+import '../models/notification_model.dart';
 import 'auth_service.dart';
 
 /// Centralized Database Service powered by Supabase (PostgreSQL + Realtime)
@@ -144,13 +149,10 @@ class SupabaseService {
       final list = (response as List)
           .map((data) => PhotographerModel.fromMap(data))
           .toList();
-      if (list.isEmpty) {
-        return _getSeedPhotographers();
-      }
       return list;
     } catch (e) {
-      debugPrint('SupabaseService.getPhotographers error (falling back to default seed): $e');
-      return _getSeedPhotographers();
+      debugPrint('SupabaseService.getPhotographers error: $e');
+      return [];
     }
   }
 
@@ -164,14 +166,12 @@ class SupabaseService {
           .maybeSingle();
 
       if (response == null) {
-        final seed = _getSeedPhotographers();
-        return seed.firstWhere((p) => p.id == id || p.id == validId, orElse: () => seed.first);
+        return null;
       }
       return PhotographerModel.fromMap(response);
     } catch (e) {
-      debugPrint('SupabaseService.getPhotographerById fallback: $e');
-      final seed = _getSeedPhotographers();
-      return seed.firstWhere((p) => p.id == id, orElse: () => seed.first);
+      debugPrint('SupabaseService.getPhotographerById error: $e');
+      return null;
     }
   }
 
@@ -183,8 +183,27 @@ class SupabaseService {
     }
   }
 
+  Future<void> updatePhotographerProfile(PhotographerModel photographer) async {
+    try {
+      final validId = AuthService.toValidUuid(photographer.id);
+      await _client.from('photographers').update(photographer.toMap()).eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.updatePhotographerProfile error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> togglePhotographerOnlineStatus(String photographerId, bool isOnline) async {
+    try {
+      final validId = AuthService.toValidUuid(photographerId);
+      await _client.from('photographers').update({'is_online': isOnline}).eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.togglePhotographerOnlineStatus notice: $e');
+    }
+  }
+
   // --------------------------------------------------------------------------
-  // PACKAGES
+  // PACKAGES (Creator Services CRUD)
   // --------------------------------------------------------------------------
   Future<List<PackageModel>> getPackages(String photographerId) async {
     try {
@@ -194,13 +213,48 @@ class SupabaseService {
           .select()
           .eq('photographer_id', validId);
 
-      if ((response as List).isEmpty) {
-        return _getDefaultPackages(photographerId);
-      }
-      return response.map((data) => PackageModel.fromMap(data)).toList();
+      return (response as List).map((data) => PackageModel.fromMap(data)).toList();
     } catch (e) {
-      debugPrint('SupabaseService.getPackages fallback: $e');
-      return _getDefaultPackages(photographerId);
+      debugPrint('SupabaseService.getPackages error: $e');
+      return [];
+    }
+  }
+
+  Future<void> createPackage(PackageModel package) async {
+    try {
+      await _client.from('packages').insert(package.toMap());
+    } catch (e) {
+      debugPrint('SupabaseService.createPackage error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updatePackage(PackageModel package) async {
+    try {
+      final validId = AuthService.toValidUuid(package.id);
+      await _client.from('packages').update(package.toMap()).eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.updatePackage error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deletePackage(String packageId) async {
+    try {
+      final validId = AuthService.toValidUuid(packageId);
+      await _client.from('packages').delete().eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.deletePackage error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> togglePackageActive(String packageId, bool isActive) async {
+    try {
+      final validId = AuthService.toValidUuid(packageId);
+      await _client.from('packages').update({'is_active': isActive}).eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.togglePackageActive notice: $e');
     }
   }
 
@@ -213,6 +267,23 @@ class SupabaseService {
     } catch (e) {
       debugPrint('SupabaseService.createBooking error: $e');
       rethrow;
+    }
+  }
+
+  Future<BookingModel?> getBookingById(String bookingId) async {
+    try {
+      final validId = AuthService.toValidUuid(bookingId);
+      final response = await _client
+          .from('bookings')
+          .select()
+          .eq('id', validId)
+          .maybeSingle();
+
+      if (response == null) return null;
+      return BookingModel.fromMap(response);
+    } catch (e) {
+      debugPrint('SupabaseService.getBookingById error: $e');
+      return null;
     }
   }
 
@@ -454,126 +525,364 @@ class SupabaseService {
   }
 
   // --------------------------------------------------------------------------
-  // SEED & FALLBACK DATA HELPERS
+  // CREATOR BOOKINGS MANAGEMENT
   // --------------------------------------------------------------------------
-  List<PhotographerModel> _getSeedPhotographers() {
-    return [
-      PhotographerModel(
-        id: 'photo_arjun_mehta',
-        userId: 'user_arjun',
-        name: 'Arjun Mehta',
-        email: 'arjun@pyp.com',
-        phone: '+91 98201 12345',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80',
-        coverImageUrl: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200&q=80',
-        bio: 'Award-winning celebrity and high-fashion editorial photographer with 8+ years experience in Mumbai & Paris.',
-        tagline: 'Vogue Featured • Cinematic Light Specialist',
-        categories: ['Wedding', 'Portrait', 'Fashion', 'Editorial'],
-        styles: ['Cinematic', 'Editorial', 'Moody & Dark', 'Vibrant & Warm'],
-        equipment: ['Sony A7 IV', '85mm f/1.4 GM', '50mm f/1.2 GM', 'Profoto B10 Plus', 'Godox AD200'],
-        startingPrice: 4999.0,
-        hourlyRate: 2499.0,
-        rating: 4.95,
-        reviewCount: 128,
-        experienceYears: 8,
-        location: 'Bandra West, Mumbai',
-        latitude: 19.0596,
-        longitude: 72.8295,
-        portfolioImages: [
-          'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80',
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
-          'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=800&q=80',
-        ],
-        createdAt: DateTime.now(),
-      ),
-      PhotographerModel(
-        id: 'photo_priya_sharma',
-        userId: 'user_priya',
-        name: 'Priya Sharma',
-        email: 'priya@pyp.com',
-        phone: '+91 98202 23456',
-        avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&q=80',
-        coverImageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80',
-        bio: 'Specializing in royal Indian destination weddings, candid emotional moments, and heirloom visual stories.',
-        tagline: 'Luxury Destination Wedding & Candid Storyteller',
-        categories: ['Wedding', 'Event', 'Portrait'],
-        styles: ['Candid', 'Vibrant & Warm', 'Cinematic'],
-        equipment: ['Canon R5', '28-70mm f/2 L', '70-200mm f/2.8 IS', 'Profoto A1X'],
-        startingPrice: 7999.0,
-        hourlyRate: 3500.0,
-        rating: 4.92,
-        reviewCount: 94,
-        experienceYears: 6,
-        location: 'Juhu, Mumbai',
-        latitude: 19.1075,
-        longitude: 72.8263,
-        createdAt: DateTime.now(),
-      ),
-      PhotographerModel(
-        id: 'photo_kabir_sen',
-        userId: 'user_kabir',
-        name: 'Kabir Sen',
-        email: 'kabir@pyp.com',
-        phone: '+91 98203 34567',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80',
-        coverImageUrl: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?w=1200&q=80',
-        bio: 'Viral 9:16 short-form creator, reel director, and certified 4K cinema drone pilot for luxury brands and festivals.',
-        tagline: 'Viral Reels & 4K Cinema Drone Specialist',
-        categories: ['Reels', 'Drone', 'Event', 'Commercial'],
-        styles: ['Cinematic', 'Vibrant & Warm', 'Commercial'],
-        equipment: ['Sony FX3', 'DJI Mavic 3 Pro', 'DJI Ronin RS3', 'Wireless Lavalier Mics'],
-        startingPrice: 3999.0,
-        hourlyRate: 1999.0,
-        rating: 4.88,
-        reviewCount: 76,
-        experienceYears: 5,
-        location: 'Andheri West, Mumbai',
-        latitude: 19.1363,
-        longitude: 72.8277,
-        createdAt: DateTime.now(),
-      ),
-    ];
+  Future<List<BookingModel>> getCreatorBookings(String photographerId) async {
+    try {
+      final validId = AuthService.toValidUuid(photographerId);
+      final response = await _client
+          .from('bookings')
+          .select()
+          .eq('photographer_id', validId)
+          .order('shoot_date', ascending: false);
+
+      return (response as List)
+          .map((data) => BookingModel.fromMap(data))
+          .toList();
+    } catch (e) {
+      debugPrint('SupabaseService.getCreatorBookings error: $e');
+      return [];
+    }
   }
 
-  List<PackageModel> _getDefaultPackages(String photographerId) {
-    return [
-      PackageModel(
-        id: 'pkg_standard',
-        photographerId: photographerId,
-        title: 'Editorial Portrait Standard',
-        description: 'Perfect for studio headshots, model portfolios, and personal branding.',
-        price: 4999.0,
-        durationMinutes: 120,
-        inclusions: [
-          '2 Hours High-End Shoot',
-          '35 Color Graded High-Res Photos',
-          '2 Outfit Looks & Moodboard Styling',
-          'Online High-Res Delivery Gallery',
-          '3-Day Turnaround Guarantee',
-        ],
-        deliverablesCount: 35,
-        turnaroundDays: 3,
-        isPopular: true,
-      ),
-      PackageModel(
-        id: 'pkg_cinematic',
-        photographerId: photographerId,
-        title: 'Cinematic Story & 4K Reels',
-        description: 'Comprehensive photography session plus 3 viral-ready 9:16 video reels with sound design.',
-        price: 8999.0,
-        durationMinutes: 240,
-        inclusions: [
-          '4 Hours Half-Day Shoot',
-          '75 Color Graded High-Res Photos',
-          '3 Viral 9:16 Reels Edited & Graded',
-          'Drone Establishing Shots Included',
-          'Online Private Gallery for 1 Year',
-        ],
-        deliverablesCount: 75,
-        turnaroundDays: 5,
-        isPopular: false,
-      ),
-    ];
+  Stream<List<BookingModel>> streamCreatorBookings(String photographerId) async* {
+    final validId = AuthService.toValidUuid(photographerId);
+
+    // Initial fetch
+    try {
+      final initialData = await getCreatorBookings(validId);
+      yield initialData;
+    } catch (e) {
+      debugPrint('streamCreatorBookings initial fetch notice: $e');
+    }
+
+    // Realtime stream
+    try {
+      final realtimeStream = _client
+          .from('bookings')
+          .stream(primaryKey: ['id'])
+          .eq('photographer_id', validId)
+          .map((list) => list.map((data) => BookingModel.fromMap(data)).toList());
+
+      await for (final update in realtimeStream.handleError((err) {
+        debugPrint('streamCreatorBookings realtime notice: $err');
+      })) {
+        yield update;
+      }
+    } catch (e) {
+      debugPrint('streamCreatorBookings realtime setup notice: $e');
+    }
+  }
+
+  Future<void> acceptBookingRequest(String bookingId) async {
+    try {
+      final validId = AuthService.toValidUuid(bookingId);
+      await _client.from('bookings').update({
+        'status': 'accepted',
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.acceptBookingRequest error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> rejectBookingRequest(String bookingId, {String? reason}) async {
+    try {
+      final validId = AuthService.toValidUuid(bookingId);
+      await _client.from('bookings').update({
+        'status': 'rejected',
+        'cancellation_reason': reason ?? 'Declined by creator',
+        'cancelled_by': 'photographer',
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.rejectBookingRequest error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> startShootDay(String bookingId) async {
+    try {
+      final validId = AuthService.toValidUuid(bookingId);
+      await _client.from('bookings').update({
+        'status': 'shoot_day',
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.startShootDay error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> completeShootBooking(String bookingId) async {
+    try {
+      final validId = AuthService.toValidUuid(bookingId);
+      await _client.from('bookings').update({
+        'status': 'completed',
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.completeShootBooking error: $e');
+      rethrow;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // AVAILABILITY & CALENDAR
+  // --------------------------------------------------------------------------
+  Future<List<AvailabilityModel>> getPhotographerAvailability(String photographerId) async {
+    try {
+      final validId = AuthService.toValidUuid(photographerId);
+      final response = await _client
+          .from('availability')
+          .select()
+          .eq('photographer_id', validId);
+
+      return (response as List)
+          .map((data) => AvailabilityModel.fromMap(data))
+          .toList();
+    } catch (e) {
+      debugPrint('SupabaseService.getPhotographerAvailability notice: $e');
+      return [];
+    }
+  }
+
+  Future<void> setAvailabilityDate(AvailabilityModel model) async {
+    try {
+      await _client.from('availability').upsert(model.toMap());
+    } catch (e) {
+      debugPrint('SupabaseService.setAvailabilityDate error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> blockTimeSlot(
+    String photographerId,
+    DateTime date,
+    String startTime,
+    String endTime, {
+    String? notes,
+  }) async {
+    final validId = AuthService.toValidUuid(photographerId);
+    final model = AvailabilityModel(
+      id: AuthService.toValidUuid('avail_${validId}_${date.year}_${date.month}_${date.day}'),
+      photographerId: validId,
+      date: date,
+      status: 'BLOCKED',
+      startTime: startTime,
+      endTime: endTime,
+      notes: notes,
+      createdAt: DateTime.now(),
+    );
+    await setAvailabilityDate(model);
+  }
+
+  // --------------------------------------------------------------------------
+  // PORTFOLIO MEDIA (Photos, Videos, Reels)
+  // --------------------------------------------------------------------------
+  Future<List<PortfolioMediaModel>> getPortfolioMedia(String photographerId) async {
+    try {
+      final validId = AuthService.toValidUuid(photographerId);
+      final response = await _client
+          .from('portfolio_media')
+          .select()
+          .eq('photographer_id', validId)
+          .order('created_at', ascending: false);
+
+      final list = (response as List).map((d) => PortfolioMediaModel.fromMap(d)).toList();
+      if (list.isNotEmpty) return list;
+
+      // Seed fallback portfolio items if empty
+      final photoProfile = await getPhotographerById(validId);
+      if (photoProfile != null && photoProfile.portfolioImages.isNotEmpty) {
+        return photoProfile.portfolioImages.map((url) {
+          return PortfolioMediaModel(
+            id: 'media_${url.hashCode.abs()}',
+            photographerId: validId,
+            title: 'Featured Portfolio Work',
+            mediaUrl: url,
+            mediaType: 'PHOTO',
+            category: 'Portrait',
+            styleTag: 'Cinematic',
+            isFeatured: true,
+            createdAt: DateTime.now(),
+          );
+        }).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('SupabaseService.getPortfolioMedia notice: $e');
+      return [];
+    }
+  }
+
+  Future<void> savePortfolioMedia(PortfolioMediaModel item) async {
+    try {
+      await _client.from('portfolio_media').upsert(item.toMap());
+    } catch (e) {
+      debugPrint('SupabaseService.savePortfolioMedia error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deletePortfolioMedia(String mediaId) async {
+    try {
+      final validId = AuthService.toValidUuid(mediaId);
+      await _client.from('portfolio_media').delete().eq('id', validId);
+    } catch (e) {
+      debugPrint('SupabaseService.deletePortfolioMedia error: $e');
+      rethrow;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // EARNINGS & PAYOUT DETAILS
+  // --------------------------------------------------------------------------
+  Future<EarningsSummaryModel> getEarningsSummary(String photographerId) async {
+    try {
+      final bookings = await getCreatorBookings(photographerId);
+      double total = 0;
+      double pending = 0;
+      double available = 0;
+      int completedCount = 0;
+
+      for (final b in bookings) {
+        if (b.status == 'completed' || b.status == 'delivered') {
+          total += b.totalAmount * 0.90; // Net payout after 10% platform fee
+          available += b.totalAmount * 0.90;
+          completedCount++;
+        } else if (b.status == 'confirmed' || b.status == 'shoot_day' || b.status == 'editing') {
+          total += b.totalAmount * 0.90;
+          pending += b.totalAmount * 0.90;
+        }
+      }
+
+      return EarningsSummaryModel(
+        totalEarnings: total,
+        pendingEarnings: pending,
+        availableEarnings: available,
+        completedShootsCount: completedCount,
+        thisMonthGrowthPercent: 0.0,
+      );
+    } catch (e) {
+      debugPrint('SupabaseService.getEarningsSummary notice: $e');
+      return EarningsSummaryModel(
+        totalEarnings: 0.0,
+        pendingEarnings: 0.0,
+        availableEarnings: 0.0,
+        completedShootsCount: 0,
+        thisMonthGrowthPercent: 0.0,
+      );
+    }
+  }
+
+  Future<List<TransactionModel>> getEarningsTransactions(String photographerId) async {
+    try {
+      final bookings = await getCreatorBookings(photographerId);
+      if (bookings.isEmpty) {
+        return [];
+      }
+
+      return bookings.map((b) => TransactionModel(
+        id: 'tx_${b.id}',
+        bookingId: b.id,
+        bookingNumber: b.id.length > 8 ? b.id.substring(0, 8).toUpperCase() : b.id,
+        customerName: b.customerName,
+        amount: b.totalAmount,
+        platformFee: b.platformFee,
+        netPayout: b.totalAmount - b.platformFee,
+        status: (b.status == 'completed' || b.status == 'delivered') ? 'completed' : 'escrow_hold',
+        createdAt: b.createdAt,
+      )).toList();
+    } catch (e) {
+      debugPrint('SupabaseService.getEarningsTransactions notice: $e');
+      return [];
+    }
+  }
+
+  Future<PayoutDetailsModel?> getPayoutDetails(String photographerId) async {
+    try {
+      final validId = AuthService.toValidUuid(photographerId);
+      final response = await _client
+          .from('payout_details')
+          .select()
+          .eq('photographer_id', validId)
+          .maybeSingle();
+
+      if (response == null) {
+        return null;
+      }
+      return PayoutDetailsModel.fromMap(response);
+    } catch (e) {
+      debugPrint('SupabaseService.getPayoutDetails notice: $e');
+      return null;
+    }
+  }
+
+  Future<void> savePayoutDetails(PayoutDetailsModel details) async {
+    try {
+      await _client.from('payout_details').upsert(details.toMap());
+    } catch (e) {
+      debugPrint('SupabaseService.savePayoutDetails error: $e');
+      rethrow;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // NOTIFICATIONS
+  // --------------------------------------------------------------------------
+  Future<List<NotificationModel>> getNotifications(String userId) async {
+    try {
+      final validId = AuthService.toValidUuid(userId);
+      final response = await _client
+          .from('notifications')
+          .select()
+          .eq('user_id', validId)
+          .order('created_at', ascending: false);
+
+      return (response as List).map((d) => NotificationModel.fromMap(d)).toList();
+    } catch (e) {
+      debugPrint('SupabaseService.getNotifications notice: $e');
+      return [];
+    }
+  }
+
+  Stream<List<NotificationModel>> streamNotifications(String userId) async* {
+    final validId = AuthService.toValidUuid(userId);
+    try {
+      final initial = await getNotifications(validId);
+      yield initial;
+    } catch (_) {}
+
+    try {
+      final realtimeStream = _client
+          .from('notifications')
+          .stream(primaryKey: ['id'])
+          .eq('user_id', validId)
+          .order('created_at', ascending: false)
+          .map((list) => list.map((d) => NotificationModel.fromMap(d)).toList());
+
+      await for (final update in realtimeStream.handleError((_) {})) {
+        yield update;
+      }
+    } catch (_) {}
+  }
+
+  Future<void> markNotificationRead(String notificationId) async {
+    try {
+      final validId = AuthService.toValidUuid(notificationId);
+      await _client.from('notifications').update({'is_read': true}).eq('id', validId);
+    } catch (_) {}
+  }
+
+  Future<void> uploadDeliverableFile(DeliverableFileModel deliverable) async {
+    try {
+      await _client.from('deliverables').insert(deliverable.toMap());
+    } catch (e) {
+      debugPrint('SupabaseService.uploadDeliverableFile error: $e');
+      rethrow;
+    }
   }
 }
 

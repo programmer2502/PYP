@@ -11,6 +11,7 @@ class ReviewModel {
   final DateTime createdAt;
 
   String get userName => customerName;
+  String get userAvatar => customerAvatar ?? '';
 
   ReviewModel({
     required this.id,

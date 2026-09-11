@@ -34,4 +34,13 @@ class AppRoutes {
   static const String editProfile = '/edit-profile';
   static const String savedPhotographers = '/saved-photographers';
   static const String helpSupport = '/help-support';
+
+  // Creator Subroutes
+  static const String creatorPortfolio = '/creator-portfolio';
+  static const String creatorPackages = '/creator-packages';
+  static const String creatorBookingDetail = '/creator-booking/:bookingId';
+  static const String creatorEarnings = '/creator-earnings';
+  static const String creatorPayoutSettings = '/creator-payout-settings';
+  static const String creatorReviews = '/creator-reviews';
+  static const String creatorNotifications = '/creator-notifications';
 }
